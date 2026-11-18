@@ -94,6 +94,7 @@
       inset: 0;
       z-index: 1;
       pointer-events: none;
+      contain: layout style paint;
     }
 
     /* =========================================================================
@@ -612,7 +613,7 @@
   var audio      = document.getElementById('bg-audio');
   var widget     = document.getElementById('music-widget');
   var lbl        = document.getElementById('music-label');
-  var TARGET_VOL = 0.12;
+  var TARGET_VOL = 0.04; // 4% ultra-soft whisper tune
 
   // Safe localStorage helpers (never throw)
   function lsGet(k, def) {
