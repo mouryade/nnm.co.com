@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Nataraj Nritya Mandir (Code No.: HOW/62) - Affiliated to Purbi Sangeet-O-Kala Kendra (Regn No. S/81662). Premier Kathak, Rabindra Nritya & Creative Dance Academy in Howrah. Direct Online Admissions.">
   <title>Nataraj Nritya Mandir (HOW/62) | Premier Indian Dance Academy</title>
   
@@ -15,27 +15,27 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   
   <!-- QRCode.js Library for Real Scan-able QR Code Generation -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
 
   <!-- EmailJS Official Browser SDK -->
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" defer></script>
 
-  <!-- Flatpickr Interactive Calendar Picker CSS & JS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <!-- Flatpickr Interactive Calendar Picker CSS & JS (Non-Blocking) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"></noscript>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr" defer></script>
 
   <!-- Preload Critical Above-The-Fold Hero Assets -->
-  <!-- Preload Critical Above-The-Fold Hero Assets -->
-  <link rel="preload" as="image" href="./assets/Madam.jpg" fetchpriority="high">
+  <link rel="preload" as="image" href="./assets/Madam.webp" type="image/webp" fetchpriority="high">
   <!-- Preload Initial Gallery Thumbnails for Instant 0-Delay Display -->
-  <link rel="preload" as="image" href="assets/Gallery/thumbs/Pic. 1.jpeg">
-  <link rel="preload" as="image" href="assets/Gallery/thumbs/Pic. 2.jpeg">
-  <link rel="preload" as="image" href="assets/Gallery/thumbs/Pic. 3.jpeg">
-  <link rel="preload" as="image" href="assets/Gallery/thumbs/Pic. 4.jpeg">
-  <link rel="preload" as="image" href="assets/Gallery/thumbs/Pic. 5.jpeg">
-  <link rel="preload" as="image" href="assets/Gallery/thumbs/Pic. 6.jpeg">
-  <link rel="preload" as="image" href="assets/Gallery/thumbs/Pic. 7.jpeg">
-  <link rel="preload" as="image" href="assets/Gallery/thumbs/Pic. 8.jpeg">
+  <link rel="preload" as="image" href="assets/Gallery/thumbs/Pic. 1.webp" type="image/webp">
+  <link rel="preload" as="image" href="assets/Gallery/thumbs/Pic. 2.webp" type="image/webp">
+  <link rel="preload" as="image" href="assets/Gallery/thumbs/Pic. 3.webp" type="image/webp">
+  <link rel="preload" as="image" href="assets/Gallery/thumbs/Pic. 4.webp" type="image/webp">
+  <link rel="preload" as="image" href="assets/Gallery/thumbs/Pic. 5.webp" type="image/webp">
+  <link rel="preload" as="image" href="assets/Gallery/thumbs/Pic. 6.webp" type="image/webp">
+  <link rel="preload" as="image" href="assets/Gallery/thumbs/Pic. 7.webp" type="image/webp">
+  <link rel="preload" as="image" href="assets/Gallery/thumbs/Pic. 8.webp" type="image/webp">
 
   <!-- Custom Style Sheet -->
   <link rel="stylesheet" href="style.css">
@@ -43,7 +43,7 @@
 <body data-theme="light">
 
   <!-- HTML5 Background Audio Element (Rabindra Sangeet) -->
-  <audio id="bg-classical-audio" src="assets/Rabindra_Sangeet.mp3" loop preload="auto"></audio>
+  <audio id="bg-classical-audio" src="assets/Rabindra_Sangeet.mp3" loop preload="none"></audio>
 
   <!-- Radiant Mesh & Full-Screen Falling Lotus Petals Canvas Background -->
   <canvas id="cosmic-canvas"></canvas>
@@ -56,7 +56,7 @@
       <div class="eq-bar"></div>
       <div class="eq-bar"></div>
     </div>
-    <span class="music-label" id="music-status-text">ðŸŽµ Music: ON</span>
+    <span class="music-label" id="music-status-text">&#127925; Music: ON</span>
   </div>
 
   <!-- ==========================================================================
@@ -68,7 +68,7 @@
       <!-- Brand Logo -->
       <a href="#home" class="nav-brand">
         <div class="logo-glow-wrapper">
-          <img src="assets/natraj_logo.jpg" alt="Natraj Logo">
+          <img src="assets/natraj_logo.webp" alt="Natraj Logo">
         </div>
         <div class="brand-text-container">
           <span class="brand-name">Nataraj Nritya Mandir</span>
@@ -108,7 +108,7 @@
     <div class="mobile-drawer-content">
       <div class="mobile-drawer-header">
         <div class="mobile-drawer-brand">
-          <img src="assets/natraj_logo.jpg" alt="Logo" class="drawer-logo-img">
+          <img src="assets/natraj_logo.webp" alt="Logo" class="drawer-logo-img">
           <div>
             <h4 class="drawer-title">Nataraj Nritya Mandir</h4>
             <span class="drawer-sub">Code No.: HOW/62</span>
@@ -136,12 +136,15 @@
        ========================================================================== -->
   <div class="marquee-wrapper">
     <div class="marquee-content">
-      <span class="marquee-text">âœ¨ Admissions are now open for the upcoming session! Join <strong>Nataraj Nritya Mandir</strong> to master Kathak, Rabindra Nritya, Nazrul Nritya, and Adhunik Dance. <strong>Contact us today</strong> to secure your spot. âœ¨</span>
-      <span class="marquee-text">âœ¨ <strong>Contact Details:</strong> +91 89612 76670 | +91 93308 05240 | +91 90880 11926 &bull; <strong>Email:</strong> natrajhowrah62@gmail.com &bull; Code No.: HOW/62 âœ¨</span>
-      <span class="marquee-text">âœ¨ Admissions are now open for the upcoming session! Join <strong>Nataraj Nritya Mandir</strong> to master Kathak, Rabindra Nritya, Nazrul Nritya, and Adhunik Dance. <strong>Contact us today</strong> to secure your spot. âœ¨</span>
-      <span class="marquee-text">âœ¨ <strong>Contact Details:</strong> +91 89612 76670 | +91 93308 05240 | +91 90880 11926 &bull; <strong>Email:</strong> natrajhowrah62@gmail.com &bull; Code No.: HOW/62 âœ¨</span>
+      <span class="marquee-text">&#10024; Admissions are now open for the upcoming session! Join <strong>Nataraj Nritya Mandir</strong> to master Kathak, Rabindra Nritya, Nazrul Nritya, and Adhunik Dance. <strong>Contact us today</strong> to secure your spot. &#10024;</span>
+      <span class="marquee-text">&#10024; <strong>Contact Details:</strong> +91 89612 76670 | +91 93308 05240 | +91 90880 11926 &bull; <strong>Email:</strong> natrajhowrah62@gmail.com &bull; Code No.: HOW/62 &#10024;</span>
+      <span class="marquee-text">&#10024; Admissions are now open for the upcoming session! Join <strong>Nataraj Nritya Mandir</strong> to master Kathak, Rabindra Nritya, Nazrul Nritya, and Adhunik Dance. <strong>Contact us today</strong> to secure your spot. &#10024;</span>
+      <span class="marquee-text">&#10024; <strong>Contact Details:</strong> +91 89612 76670 | +91 93308 05240 | +91 90880 11926 &bull; <strong>Email:</strong> natrajhowrah62@gmail.com &bull; Code No.: HOW/62 &#10024;</span>
     </div>
   </div>
+
+  <!-- Main Landmark for Screen Readers & SEO -->
+  <main id="main-content">
 
   <!-- ==========================================================================
        SPA PAGE VIEW 1: HOME PAGE
@@ -162,7 +165,7 @@
 
           <div class="hero-academy-badge stagger-item" style="display: flex; align-items: center; gap: 14px; background: rgba(212, 175, 55, 0.12); border: 1.5px solid var(--neon-gold); border-radius: var(--radius-md); padding: 0.85rem 1.3rem; margin-top: 1.6rem; max-width: 540px;">
             <div class="logo-glow-wrapper" style="width: 52px; height: 52px; aspect-ratio: 1/1; border: 1.5px solid var(--neon-gold); flex-shrink: 0;">
-              <img src="assets/natraj_logo.jpg" alt="Natraj Logo" style="width: 100%; height: 100%;">
+              <img src="assets/natraj_logo.webp" alt="Natraj Logo" style="width: 100%; height: 100%;">
             </div>
             <div>
               <span style="color: var(--neon-gold-bright); font-weight: 800; font-size: 1.02rem; font-family: var(--font-royal); display: block;">Nataraj Nritya Mandir</span>
@@ -184,7 +187,7 @@
           <div class="founder-cloud-wrapper">
             <div class="founder-cloud-glow-ring"></div>
             <div class="founder-cloud-frame">
-              <img src="./assets/Madam.jpg" alt="Founder Smt. Sankari De" class="founder-cloud-img" draggable="false" loading="eager" fetchpriority="high" decoding="sync">
+              <img src="assets/Madam.webp" alt="Founder Smt. Sankari De" class="founder-cloud-img" draggable="false" loading="eager" fetchpriority="high" decoding="sync">
             </div>
             <div class="founder-cloud-shimmer"></div>
           </div>
@@ -207,7 +210,7 @@
         <div class="courses-grid">
           <div class="course-card stagger-item">
             <div class="course-img-container">
-              <img src="assets/Kathak.png" alt="Kathak Classical Dance Discipline" class="discipline-character-img" loading="lazy" decoding="async">
+              <img src="assets/Kathak.webp" alt="Kathak Classical Dance Discipline" class="discipline-character-img" loading="lazy" decoding="async">
               <span class="course-category-tag">Classical</span>
             </div>
             <div class="course-body">
@@ -225,7 +228,7 @@
 
           <div class="course-card stagger-item">
             <div class="course-img-container">
-              <img src="assets/Rabindranritya.png" alt="Rabindra Nritya Dance Discipline" class="discipline-character-img" loading="lazy" decoding="async">
+              <img src="assets/Rabindranritya.webp" alt="Rabindra Nritya Dance Discipline" class="discipline-character-img" loading="lazy" decoding="async">
               <span class="course-category-tag">Tagore Art</span>
             </div>
             <div class="course-body">
@@ -243,7 +246,7 @@
 
           <div class="course-card stagger-item">
             <div class="course-img-container">
-              <img src="assets/Adhuniknritya.png" alt="Creative Dance Discipline" class="discipline-character-img" loading="lazy" decoding="async">
+              <img src="assets/Adhuniknritya.webp" alt="Creative Dance Discipline" class="discipline-character-img" loading="lazy" decoding="async">
               <span class="course-category-tag">Expressive & Folk</span>
             </div>
             <div class="course-body">
@@ -272,7 +275,7 @@
         <div class="section-header stagger-item">
           <span class="section-subtitle">What Sets Us Apart</span>
           <h2 class="section-title">Why Choose Nataraj Nritya Mandir?</h2>
-          <p class="section-description">35+ years of nurturing Indian performing arts â€” building champions, not just dancers.</p>
+          <p class="section-description">35+ years of nurturing Indian performing arts &mdash; building champions, not just dancers.</p>
         </div>
         <div class="highlights-grid">
           <div class="highlight-card stagger-item">
@@ -294,7 +297,7 @@
               <i class="fa-brands fa-youtube" style="color: #FF4444;"></i>
             </div>
             <h3 class="highlight-card-title">Official YouTube Features</h3>
-            <p class="highlight-card-desc">Top-performing and talented students get exclusive opportunities to showcase their art on our Official YouTube Channel â€” a platform for global recognition.</p>
+            <p class="highlight-card-desc">Top-performing and talented students get exclusive opportunities to showcase their art on our Official YouTube Channel &mdash; a platform for global recognition.</p>
           </div>
           <div class="highlight-card stagger-item">
             <div class="highlight-card-icon" style="background: linear-gradient(135deg, rgba(255,152,0,0.2), rgba(212,175,55,0.2)); border-color: #FF9800;">
@@ -329,12 +332,12 @@
 
             <!-- Dual Emblem & Featured Ultra-Large Perfect 1:1 Circle Logo -->
             <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 1.8rem; flex-wrap: wrap;">
-              <div class="logo-glow-wrapper" style="width: 130px; height: 130px; aspect-ratio: 1/1;" title="Official Academy Emblem">
-                <img src="assets/natraj_logo.jpg" alt="Natraj Official Academy Emblem" style="width: 130px; height: 130px; aspect-ratio: 1/1;" loading="lazy" decoding="async">
+              <div class="logo-glow-wrapper about-extra-logo" style="width: 130px; height: 130px; aspect-ratio: 1/1;" title="Official Academy Emblem">
+                <img src="assets/natraj_logo.webp" alt="Natraj Official Academy Emblem" style="width: 130px; height: 130px; aspect-ratio: 1/1;" loading="lazy" decoding="async">
               </div>
               <div class="board-affiliation-card">
                 <div class="board-emblem-container">
-                  <img src="assets/board_emblem.jpg" alt="Purbi Sangeet-O-Kala Kendra Emblem" class="board-emblem-img" loading="lazy" decoding="async">
+                  <img src="assets/board_emblem.webp" alt="Purbi Sangeet-O-Kala Kendra Emblem" class="board-emblem-img" loading="lazy" decoding="async">
                 </div>
                 <div>
                   <h4 class="board-card-title">Purbi Sangeet-O-Kala Kendra</h4>
@@ -416,7 +419,7 @@
         <div class="courses-grid" style="margin-bottom: 3rem;">
           <div class="course-card stagger-item">
             <div class="course-img-container">
-              <img src="assets/Kathak.png" alt="Kathak Classical Dance Course" class="discipline-character-img" loading="lazy" decoding="async">
+              <img src="assets/Kathak.webp" alt="Kathak Classical Dance Course" class="discipline-character-img" loading="lazy" decoding="async">
               <span class="course-category-tag">Classical</span>
             </div>
             <div class="course-body">
@@ -434,7 +437,7 @@
 
           <div class="course-card stagger-item">
             <div class="course-img-container">
-              <img src="assets/Rabindranritya.png" alt="Rabindra Nritya Dance Course" class="discipline-character-img" loading="lazy" decoding="async">
+              <img src="assets/Rabindranritya.webp" alt="Rabindra Nritya Dance Course" class="discipline-character-img" loading="lazy" decoding="async">
               <span class="course-category-tag">Tagore Heritage</span>
             </div>
             <div class="course-body">
@@ -452,7 +455,7 @@
 
           <div class="course-card stagger-item">
             <div class="course-img-container">
-              <img src="assets/Adhuniknritya.png" alt="Nazrul Nritya & Adhunik Dance Course" class="discipline-character-img" loading="lazy" decoding="async">
+              <img src="assets/Adhuniknritya.webp" alt="Nazrul Nritya & Adhunik Dance Course" class="discipline-character-img" loading="lazy" decoding="async">
               <span class="course-category-tag">Rebellious & Modern</span>
             </div>
             <div class="course-body">
@@ -527,9 +530,9 @@
 
         <!-- Unified Clean Performance Gallery Grid -->
         <div class="performance-gallery-grid stagger-item">
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 6.jpeg" data-full="assets/Gallery/Pic. 6.jpeg" data-title="Environmental Awareness: Anti-Pollution Dance Drama Campaign" data-year="2026" tabindex="0" role="button" aria-label="View Environmental Awareness: Anti-Pollution Dance Drama Campaign (2026)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 6.webp" data-full="assets/Gallery/Pic. 6.webp" data-title="Environmental Awareness: Anti-Pollution Dance Drama Campaign" data-year="2026" tabindex="0" role="button" aria-label="View Environmental Awareness: Anti-Pollution Dance Drama Campaign (2026)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 6.jpeg" alt="Environmental Awareness: Anti-Pollution Dance Drama Campaign" loading="eager" fetchpriority="high" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 6.webp" alt="Environmental Awareness: Anti-Pollution Dance Drama Campaign" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Environmental Awareness: Anti-Pollution Dance Drama Campaign</h4>
@@ -538,9 +541,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 7.jpeg" data-full="assets/Gallery/Pic. 7.jpeg" data-title="Community Outreach: Anti-Pollution Campaign Performance" data-year="2026" tabindex="0" role="button" aria-label="View Community Outreach: Anti-Pollution Campaign Performance (2026)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 7.webp" data-full="assets/Gallery/Pic. 7.webp" data-title="Community Outreach: Anti-Pollution Campaign Performance" data-year="2026" tabindex="0" role="button" aria-label="View Community Outreach: Anti-Pollution Campaign Performance (2026)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 7.jpeg" alt="Community Outreach: Anti-Pollution Campaign Performance" loading="eager" fetchpriority="high" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 7.webp" alt="Community Outreach: Anti-Pollution Campaign Performance" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Community Outreach: Anti-Pollution Campaign Performance</h4>
@@ -549,9 +552,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 25.jpeg" data-full="assets/Gallery/Pic. 25.jpeg" data-title="Divine Energy in Motion: Highlights from the Kali Puja Celebration" data-year="2026" tabindex="0" role="button" aria-label="View Divine Energy in Motion: Highlights from the Kali Puja Celebration (2026)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 25.webp" data-full="assets/Gallery/Pic. 25.webp" data-title="Divine Energy in Motion: Highlights from the Kali Puja Celebration" data-year="2026" tabindex="0" role="button" aria-label="View Divine Energy in Motion: Highlights from the Kali Puja Celebration (2026)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 25.jpeg" alt="Divine Energy in Motion: Highlights from the Kali Puja Celebration" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 25.webp" alt="Divine Energy in Motion: Highlights from the Kali Puja Celebration" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Divine Energy in Motion: Highlights from the Kali Puja Celebration</h4>
@@ -560,9 +563,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 32.jpeg" data-full="assets/Gallery/Pic. 32.jpeg" data-title="Grace and Grandeur: Festive Showcase by Nataraj Nritya Mandir" data-year="2026" tabindex="0" role="button" aria-label="View Grace and Grandeur: Festive Showcase by Nataraj Nritya Mandir (2026)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 32.webp" data-full="assets/Gallery/Pic. 32.webp" data-title="Grace and Grandeur: Festive Showcase by Nataraj Nritya Mandir" data-year="2026" tabindex="0" role="button" aria-label="View Grace and Grandeur: Festive Showcase by Nataraj Nritya Mandir (2026)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 32.jpeg" alt="Grace and Grandeur: Festive Showcase by Nataraj Nritya Mandir" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 32.webp" alt="Grace and Grandeur: Festive Showcase by Nataraj Nritya Mandir" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Grace and Grandeur: Festive Showcase by Nataraj Nritya Mandir</h4>
@@ -571,9 +574,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 10.jpeg" data-full="assets/Gallery/Pic. 10.jpeg" data-title="Community Engagement: West Bengal Gramin Bank Event" data-year="2025" tabindex="0" role="button" aria-label="View Community Engagement: West Bengal Gramin Bank Event (2025)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 10.webp" data-full="assets/Gallery/Pic. 10.webp" data-title="Community Engagement: West Bengal Gramin Bank Event" data-year="2025" tabindex="0" role="button" aria-label="View Community Engagement: West Bengal Gramin Bank Event (2025)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 10.jpeg" alt="Community Engagement: West Bengal Gramin Bank Event" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 10.webp" alt="Community Engagement: West Bengal Gramin Bank Event" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Community Engagement: West Bengal Gramin Bank Event</h4>
@@ -582,9 +585,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 22.jpeg" data-full="assets/Gallery/Pic. 22.jpeg" data-title="Unity in Diversity: A Thematic Rally Promoting Interfaith Harmony" data-year="2025" tabindex="0" role="button" aria-label="View Unity in Diversity: A Thematic Rally Promoting Interfaith Harmony (2025)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 22.webp" data-full="assets/Gallery/Pic. 22.webp" data-title="Unity in Diversity: A Thematic Rally Promoting Interfaith Harmony" data-year="2025" tabindex="0" role="button" aria-label="View Unity in Diversity: A Thematic Rally Promoting Interfaith Harmony (2025)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 22.jpeg" alt="Unity in Diversity: A Thematic Rally Promoting Interfaith Harmony" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 22.webp" alt="Unity in Diversity: A Thematic Rally Promoting Interfaith Harmony" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Unity in Diversity: A Thematic Rally Promoting Interfaith Harmony</h4>
@@ -593,9 +596,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 28.jpeg" data-full="assets/Gallery/Pic. 28.jpeg" data-title="The Essence of Shakti: Stage Brilliance by Our Artists" data-year="2025" tabindex="0" role="button" aria-label="View The Essence of Shakti: Stage Brilliance by Our Artists (2025)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 28.webp" data-full="assets/Gallery/Pic. 28.webp" data-title="The Essence of Shakti: Stage Brilliance by Our Artists" data-year="2025" tabindex="0" role="button" aria-label="View The Essence of Shakti: Stage Brilliance by Our Artists (2025)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 28.jpeg" alt="The Essence of Shakti: Stage Brilliance by Our Artists" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 28.webp" alt="The Essence of Shakti: Stage Brilliance by Our Artists" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">The Essence of Shakti: Stage Brilliance by Our Artists</h4>
@@ -604,9 +607,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 27.jpeg" data-full="assets/Gallery/Pic. 27.jpeg" data-title="Devotional March: Ram Mandir Inauguration Celebration" data-year="2024" tabindex="0" role="button" aria-label="View Devotional March: Ram Mandir Inauguration Celebration (2024)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 27.webp" data-full="assets/Gallery/Pic. 27.webp" data-title="Devotional March: Ram Mandir Inauguration Celebration" data-year="2024" tabindex="0" role="button" aria-label="View Devotional March: Ram Mandir Inauguration Celebration (2024)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 27.jpeg" alt="Devotional March: Ram Mandir Inauguration Celebration" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 27.webp" alt="Devotional March: Ram Mandir Inauguration Celebration" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Devotional March: Ram Mandir Inauguration Celebration</h4>
@@ -615,9 +618,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 29.jpeg" data-full="assets/Gallery/Pic. 29.jpeg" data-title="Joyous Procession: Rath Yatra Celebration" data-year="2024" tabindex="0" role="button" aria-label="View Joyous Procession: Rath Yatra Celebration (2024)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 29.webp" data-full="assets/Gallery/Pic. 29.webp" data-title="Joyous Procession: Rath Yatra Celebration" data-year="2024" tabindex="0" role="button" aria-label="View Joyous Procession: Rath Yatra Celebration (2024)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 29.jpeg" alt="Joyous Procession: Rath Yatra Celebration" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 29.webp" alt="Joyous Procession: Rath Yatra Celebration" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Joyous Procession: Rath Yatra Celebration</h4>
@@ -626,9 +629,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 35.jpeg" data-full="assets/Gallery/Pic. 35.jpeg" data-title="Echoes of Awakening: A Thematic Tribute on Swami Vivekananda's Jayanti" data-year="2024" tabindex="0" role="button" aria-label="View Echoes of Awakening: A Thematic Tribute on Swami Vivekananda's Jayanti (2024)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 35.webp" data-full="assets/Gallery/Pic. 35.webp" data-title="Echoes of Awakening: A Thematic Tribute on Swami Vivekananda's Jayanti" data-year="2024" tabindex="0" role="button" aria-label="View Echoes of Awakening: A Thematic Tribute on Swami Vivekananda's Jayanti (2024)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 35.jpeg" alt="Echoes of Awakening: A Thematic Tribute on Swami Vivekananda's Jayanti" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 35.webp" alt="Echoes of Awakening: A Thematic Tribute on Swami Vivekananda's Jayanti" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Echoes of Awakening: A Thematic Tribute on Swami Vivekananda's Jayanti</h4>
@@ -637,9 +640,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 20.jpeg" data-full="assets/Gallery/Pic. 20.jpeg" data-title="Celebrating Nari Shakti: Joyous Expressions from Durga Puja" data-year="2023" tabindex="0" role="button" aria-label="View Celebrating Nari Shakti: Joyous Expressions from Durga Puja (2023)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 20.webp" data-full="assets/Gallery/Pic. 20.webp" data-title="Celebrating Nari Shakti: Joyous Expressions from Durga Puja" data-year="2023" tabindex="0" role="button" aria-label="View Celebrating Nari Shakti: Joyous Expressions from Durga Puja (2023)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 20.jpeg" alt="Celebrating Nari Shakti: Joyous Expressions from Durga Puja" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 20.webp" alt="Celebrating Nari Shakti: Joyous Expressions from Durga Puja" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Celebrating Nari Shakti: Joyous Expressions from Durga Puja</h4>
@@ -648,9 +651,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 21.jpeg" data-full="assets/Gallery/Pic. 21.jpeg" data-title="Divine Manifestations: 'Navadurga' Special Video Production" data-year="2023" tabindex="0" role="button" aria-label="View Divine Manifestations: 'Navadurga' Special Video Production (2023)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 21.webp" data-full="assets/Gallery/Pic. 21.webp" data-title="Divine Manifestations: 'Navadurga' Special Video Production" data-year="2023" tabindex="0" role="button" aria-label="View Divine Manifestations: 'Navadurga' Special Video Production (2023)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 21.jpeg" alt="Divine Manifestations: 'Navadurga' Special Video Production" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 21.webp" alt="Divine Manifestations: 'Navadurga' Special Video Production" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Divine Manifestations: 'Navadurga' Special Video Production</h4>
@@ -659,9 +662,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 8.jpeg" data-full="assets/Gallery/Pic. 8.jpeg" data-title="Fierce Devotion: 'Mahakali' Dance for Kali Puja" data-year="2022" tabindex="0" role="button" aria-label="View Fierce Devotion: 'Mahakali' Dance for Kali Puja (2022)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 8.webp" data-full="assets/Gallery/Pic. 8.webp" data-title="Fierce Devotion: 'Mahakali' Dance for Kali Puja" data-year="2022" tabindex="0" role="button" aria-label="View Fierce Devotion: 'Mahakali' Dance for Kali Puja (2022)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 8.jpeg" alt="Fierce Devotion: 'Mahakali' Dance for Kali Puja" loading="eager" fetchpriority="high" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 8.webp" alt="Fierce Devotion: 'Mahakali' Dance for Kali Puja" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Fierce Devotion: 'Mahakali' Dance for Kali Puja</h4>
@@ -670,9 +673,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 9.jpeg" data-full="assets/Gallery/Pic. 9.jpeg" data-title="Cultural Celebration: Rath Yatra Festivities" data-year="2022" tabindex="0" role="button" aria-label="View Cultural Celebration: Rath Yatra Festivities (2022)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 9.webp" data-full="assets/Gallery/Pic. 9.webp" data-title="Cultural Celebration: Rath Yatra Festivities" data-year="2022" tabindex="0" role="button" aria-label="View Cultural Celebration: Rath Yatra Festivities (2022)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 9.jpeg" alt="Cultural Celebration: Rath Yatra Festivities" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 9.webp" alt="Cultural Celebration: Rath Yatra Festivities" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Cultural Celebration: Rath Yatra Festivities</h4>
@@ -681,9 +684,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 12.jpeg" data-full="assets/Gallery/Pic. 12.jpeg" data-title="Cinematic Devotion: Kali Puja Dance Video Production" data-year="2022" tabindex="0" role="button" aria-label="View Cinematic Devotion: Kali Puja Dance Video Production (2022)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 12.webp" data-full="assets/Gallery/Pic. 12.webp" data-title="Cinematic Devotion: Kali Puja Dance Video Production" data-year="2022" tabindex="0" role="button" aria-label="View Cinematic Devotion: Kali Puja Dance Video Production (2022)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 12.jpeg" alt="Cinematic Devotion: Kali Puja Dance Video Production" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 12.webp" alt="Cinematic Devotion: Kali Puja Dance Video Production" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Cinematic Devotion: Kali Puja Dance Video Production</h4>
@@ -692,9 +695,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 14.jpeg" data-full="assets/Gallery/Pic. 14.jpeg" data-title="Colors of Spring: Basanta Utsav Celebration" data-year="2022" tabindex="0" role="button" aria-label="View Colors of Spring: Basanta Utsav Celebration (2022)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 14.webp" data-full="assets/Gallery/Pic. 14.webp" data-title="Colors of Spring: Basanta Utsav Celebration" data-year="2022" tabindex="0" role="button" aria-label="View Colors of Spring: Basanta Utsav Celebration (2022)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 14.jpeg" alt="Colors of Spring: Basanta Utsav Celebration" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 14.webp" alt="Colors of Spring: Basanta Utsav Celebration" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Colors of Spring: Basanta Utsav Celebration</h4>
@@ -703,9 +706,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 15.jpeg" data-full="assets/Gallery/Pic. 15.jpeg" data-title="Literary Tribute: Rabindra Jayanti Celebration" data-year="2022" tabindex="0" role="button" aria-label="View Literary Tribute: Rabindra Jayanti Celebration (2022)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 15.webp" data-full="assets/Gallery/Pic. 15.webp" data-title="Literary Tribute: Rabindra Jayanti Celebration" data-year="2022" tabindex="0" role="button" aria-label="View Literary Tribute: Rabindra Jayanti Celebration (2022)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 15.jpeg" alt="Literary Tribute: Rabindra Jayanti Celebration" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 15.webp" alt="Literary Tribute: Rabindra Jayanti Celebration" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Literary Tribute: Rabindra Jayanti Celebration</h4>
@@ -714,9 +717,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 16.jpeg" data-full="assets/Gallery/Pic. 16.jpeg" data-title="Spiritual Tribute: Bamdev Tara Maa Video Production" data-year="2022" tabindex="0" role="button" aria-label="View Spiritual Tribute: Bamdev Tara Maa Video Production (2022)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 16.webp" data-full="assets/Gallery/Pic. 16.webp" data-title="Spiritual Tribute: Bamdev Tara Maa Video Production" data-year="2022" tabindex="0" role="button" aria-label="View Spiritual Tribute: Bamdev Tara Maa Video Production (2022)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 16.jpeg" alt="Spiritual Tribute: Bamdev Tara Maa Video Production" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 16.webp" alt="Spiritual Tribute: Bamdev Tara Maa Video Production" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Spiritual Tribute: Bamdev Tara Maa Video Production</h4>
@@ -725,9 +728,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 17.jpeg" data-full="assets/Gallery/Pic. 17.jpeg" data-title="In Remembrance of the Bard: A Rabindra Jayanti Tribute" data-year="2022" tabindex="0" role="button" aria-label="View In Remembrance of the Bard: A Rabindra Jayanti Tribute (2022)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 17.webp" data-full="assets/Gallery/Pic. 17.webp" data-title="In Remembrance of the Bard: A Rabindra Jayanti Tribute" data-year="2022" tabindex="0" role="button" aria-label="View In Remembrance of the Bard: A Rabindra Jayanti Tribute (2022)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 17.jpeg" alt="In Remembrance of the Bard: A Rabindra Jayanti Tribute" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 17.webp" alt="In Remembrance of the Bard: A Rabindra Jayanti Tribute" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">In Remembrance of the Bard: A Rabindra Jayanti Tribute</h4>
@@ -736,9 +739,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 18.jpeg" data-full="assets/Gallery/Pic. 18.jpeg" data-title="Spiritual Devotion: 'Maa Tuhi Kalika' Video Performance" data-year="2022" tabindex="0" role="button" aria-label="View Spiritual Devotion: 'Maa Tuhi Kalika' Video Performance (2022)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 18.webp" data-full="assets/Gallery/Pic. 18.webp" data-title="Spiritual Devotion: 'Maa Tuhi Kalika' Video Performance" data-year="2022" tabindex="0" role="button" aria-label="View Spiritual Devotion: 'Maa Tuhi Kalika' Video Performance (2022)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 18.jpeg" alt="Spiritual Devotion: 'Maa Tuhi Kalika' Video Performance" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 18.webp" alt="Spiritual Devotion: 'Maa Tuhi Kalika' Video Performance" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Spiritual Devotion: 'Maa Tuhi Kalika' Video Performance</h4>
@@ -747,9 +750,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 23.jpeg" data-full="assets/Gallery/Pic. 23.jpeg" data-title="Autumn Melodies: Stage Showcase During Durga Puja Festivities" data-year="2022" tabindex="0" role="button" aria-label="View Autumn Melodies: Stage Showcase During Durga Puja Festivities (2022)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 23.webp" data-full="assets/Gallery/Pic. 23.webp" data-title="Autumn Melodies: Stage Showcase During Durga Puja Festivities" data-year="2022" tabindex="0" role="button" aria-label="View Autumn Melodies: Stage Showcase During Durga Puja Festivities (2022)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 23.jpeg" alt="Autumn Melodies: Stage Showcase During Durga Puja Festivities" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 23.webp" alt="Autumn Melodies: Stage Showcase During Durga Puja Festivities" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Autumn Melodies: Stage Showcase During Durga Puja Festivities</h4>
@@ -758,9 +761,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 30.jpeg" data-full="assets/Gallery/Pic. 30.jpeg" data-title="Centennial Tribute: Sri Aurobindo 150th Anniversary Rally" data-year="2022" tabindex="0" role="button" aria-label="View Centennial Tribute: Sri Aurobindo 150th Anniversary Rally (2022)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 30.webp" data-full="assets/Gallery/Pic. 30.webp" data-title="Centennial Tribute: Sri Aurobindo 150th Anniversary Rally" data-year="2022" tabindex="0" role="button" aria-label="View Centennial Tribute: Sri Aurobindo 150th Anniversary Rally (2022)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 30.jpeg" alt="Centennial Tribute: Sri Aurobindo 150th Anniversary Rally" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 30.webp" alt="Centennial Tribute: Sri Aurobindo 150th Anniversary Rally" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Centennial Tribute: Sri Aurobindo 150th Anniversary Rally</h4>
@@ -769,9 +772,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 31.jpeg" data-full="assets/Gallery/Pic. 31.jpeg" data-title="Commemorative Rally: Sri Aurobindo 150th Anniversary" data-year="2022" tabindex="0" role="button" aria-label="View Commemorative Rally: Sri Aurobindo 150th Anniversary (2022)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 31.webp" data-full="assets/Gallery/Pic. 31.webp" data-title="Commemorative Rally: Sri Aurobindo 150th Anniversary" data-year="2022" tabindex="0" role="button" aria-label="View Commemorative Rally: Sri Aurobindo 150th Anniversary (2022)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 31.jpeg" alt="Commemorative Rally: Sri Aurobindo 150th Anniversary" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 31.webp" alt="Commemorative Rally: Sri Aurobindo 150th Anniversary" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Commemorative Rally: Sri Aurobindo 150th Anniversary</h4>
@@ -780,9 +783,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 36.jpeg" data-full="assets/Gallery/Pic. 36.jpeg" data-title="Cultural Grandeur: Stunning Group Performance for Kali Puja" data-year="2022" tabindex="0" role="button" aria-label="View Cultural Grandeur: Stunning Group Performance for Kali Puja (2022)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 36.webp" data-full="assets/Gallery/Pic. 36.webp" data-title="Cultural Grandeur: Stunning Group Performance for Kali Puja" data-year="2022" tabindex="0" role="button" aria-label="View Cultural Grandeur: Stunning Group Performance for Kali Puja (2022)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 36.jpeg" alt="Cultural Grandeur: Stunning Group Performance for Kali Puja" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 36.webp" alt="Cultural Grandeur: Stunning Group Performance for Kali Puja" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Cultural Grandeur: Stunning Group Performance for Kali Puja</h4>
@@ -791,9 +794,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 11.jpeg" data-full="assets/Gallery/Pic. 11.jpeg" data-title="Divine Love: Radha Krishna Raas Leela Performance" data-year="2021" tabindex="0" role="button" aria-label="View Divine Love: Radha Krishna Raas Leela Performance (2021)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 11.webp" data-full="assets/Gallery/Pic. 11.webp" data-title="Divine Love: Radha Krishna Raas Leela Performance" data-year="2021" tabindex="0" role="button" aria-label="View Divine Love: Radha Krishna Raas Leela Performance (2021)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 11.jpeg" alt="Divine Love: Radha Krishna Raas Leela Performance" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 11.webp" alt="Divine Love: Radha Krishna Raas Leela Performance" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Divine Love: Radha Krishna Raas Leela Performance</h4>
@@ -802,9 +805,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 34.jpeg" data-full="assets/Gallery/Pic. 34.jpeg" data-title="Independence Day Pride: August 15th Rally" data-year="2021" tabindex="0" role="button" aria-label="View Independence Day Pride: August 15th Rally (2021)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 34.webp" data-full="assets/Gallery/Pic. 34.webp" data-title="Independence Day Pride: August 15th Rally" data-year="2021" tabindex="0" role="button" aria-label="View Independence Day Pride: August 15th Rally (2021)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 34.jpeg" alt="Independence Day Pride: August 15th Rally" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 34.webp" alt="Independence Day Pride: August 15th Rally" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Independence Day Pride: August 15th Rally</h4>
@@ -813,9 +816,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 13.jpeg" data-full="assets/Gallery/Pic. 13.jpeg" data-title="Patriotic Fervor: Independence Day Rally Participation" data-year="2019" tabindex="0" role="button" aria-label="View Patriotic Fervor: Independence Day Rally Participation (2019)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 13.webp" data-full="assets/Gallery/Pic. 13.webp" data-title="Patriotic Fervor: Independence Day Rally Participation" data-year="2019" tabindex="0" role="button" aria-label="View Patriotic Fervor: Independence Day Rally Participation (2019)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 13.jpeg" alt="Patriotic Fervor: Independence Day Rally Participation" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 13.webp" alt="Patriotic Fervor: Independence Day Rally Participation" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Patriotic Fervor: Independence Day Rally Participation</h4>
@@ -824,9 +827,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 24.jpeg" data-full="assets/Gallery/Pic. 24.jpeg" data-title="Devotion in Motion: Captivating Highlights from Kali Puja Stage" data-year="2018" tabindex="0" role="button" aria-label="View Devotion in Motion: Captivating Highlights from Kali Puja Stage (2018)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 24.webp" data-full="assets/Gallery/Pic. 24.webp" data-title="Devotion in Motion: Captivating Highlights from Kali Puja Stage" data-year="2018" tabindex="0" role="button" aria-label="View Devotion in Motion: Captivating Highlights from Kali Puja Stage (2018)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 24.jpeg" alt="Devotion in Motion: Captivating Highlights from Kali Puja Stage" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 24.webp" alt="Devotion in Motion: Captivating Highlights from Kali Puja Stage" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Devotion in Motion: Captivating Highlights from Kali Puja Stage</h4>
@@ -835,9 +838,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 33.jpeg" data-full="assets/Gallery/Pic. 33.jpeg" data-title="Festive Melodies: Cherished Moments from Our Sharad Utsav" data-year="2018" tabindex="0" role="button" aria-label="View Festive Melodies: Cherished Moments from Our Sharad Utsav (2018)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 33.webp" data-full="assets/Gallery/Pic. 33.webp" data-title="Festive Melodies: Cherished Moments from Our Sharad Utsav" data-year="2018" tabindex="0" role="button" aria-label="View Festive Melodies: Cherished Moments from Our Sharad Utsav (2018)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 33.jpeg" alt="Festive Melodies: Cherished Moments from Our Sharad Utsav" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 33.webp" alt="Festive Melodies: Cherished Moments from Our Sharad Utsav" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Festive Melodies: Cherished Moments from Our Sharad Utsav</h4>
@@ -846,9 +849,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 26.jpeg" data-full="assets/Gallery/Pic. 26.jpeg" data-title="Celebrating Agomoni: A Cultural Extravaganza at Durga Puja" data-year="2016" tabindex="0" role="button" aria-label="View Celebrating Agomoni: A Cultural Extravaganza at Durga Puja (2016)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 26.webp" data-full="assets/Gallery/Pic. 26.webp" data-title="Celebrating Agomoni: A Cultural Extravaganza at Durga Puja" data-year="2016" tabindex="0" role="button" aria-label="View Celebrating Agomoni: A Cultural Extravaganza at Durga Puja (2016)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 26.jpeg" alt="Celebrating Agomoni: A Cultural Extravaganza at Durga Puja" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 26.webp" alt="Celebrating Agomoni: A Cultural Extravaganza at Durga Puja" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Celebrating Agomoni: A Cultural Extravaganza at Durga Puja</h4>
@@ -857,9 +860,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 19.jpeg" data-full="assets/Gallery/Pic. 19.jpeg" data-title="Stage Brilliance: Annual Cultural Program Highlights" data-year="2008" tabindex="0" role="button" aria-label="View Stage Brilliance: Annual Cultural Program Highlights (2008)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 19.webp" data-full="assets/Gallery/Pic. 19.webp" data-title="Stage Brilliance: Annual Cultural Program Highlights" data-year="2008" tabindex="0" role="button" aria-label="View Stage Brilliance: Annual Cultural Program Highlights (2008)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 19.jpeg" alt="Stage Brilliance: Annual Cultural Program Highlights" loading="lazy" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 19.webp" alt="Stage Brilliance: Annual Cultural Program Highlights" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Stage Brilliance: Annual Cultural Program Highlights</h4>
@@ -868,9 +871,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 5.jpeg" data-full="assets/Gallery/Pic. 5.jpeg" data-title="Dance Examination Focus: 'Aay Tobe Sahachari' Routine" data-year="2000" tabindex="0" role="button" aria-label="View Dance Examination Focus: 'Aay Tobe Sahachari' Routine (2000)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 5.webp" data-full="assets/Gallery/Pic. 5.webp" data-title="Dance Examination Focus: 'Aay Tobe Sahachari' Routine" data-year="2000" tabindex="0" role="button" aria-label="View Dance Examination Focus: 'Aay Tobe Sahachari' Routine (2000)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 5.jpeg" alt="Dance Examination Focus: 'Aay Tobe Sahachari' Routine" loading="eager" fetchpriority="high" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 5.webp" alt="Dance Examination Focus: 'Aay Tobe Sahachari' Routine" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Dance Examination Focus: 'Aay Tobe Sahachari' Routine</h4>
@@ -879,9 +882,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 4.jpeg" data-full="assets/Gallery/Pic. 4.jpeg" data-title="Shantiniketan Showcase: 'Prothomo Aadi Tobo Shakti' Tribute" data-year="1996" tabindex="0" role="button" aria-label="View Shantiniketan Showcase: 'Prothomo Aadi Tobo Shakti' Tribute (1996)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 4.webp" data-full="assets/Gallery/Pic. 4.webp" data-title="Shantiniketan Showcase: 'Prothomo Aadi Tobo Shakti' Tribute" data-year="1996" tabindex="0" role="button" aria-label="View Shantiniketan Showcase: 'Prothomo Aadi Tobo Shakti' Tribute (1996)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 4.jpeg" alt="Shantiniketan Showcase: 'Prothomo Aadi Tobo Shakti' Tribute" loading="eager" fetchpriority="high" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 4.webp" alt="Shantiniketan Showcase: 'Prothomo Aadi Tobo Shakti' Tribute" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Shantiniketan Showcase: 'Prothomo Aadi Tobo Shakti' Tribute</h4>
@@ -890,9 +893,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 3.jpeg" data-full="assets/Gallery/Pic. 3.jpeg" data-title="Vibrant Performance: 'Haiyo Re Maaro jor Hey Allah Hey Rama'" data-year="1995" tabindex="0" role="button" aria-label="View Vibrant Performance: 'Haiyo Re Maaro jor Hey Allah Hey Rama' (1995)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 3.webp" data-full="assets/Gallery/Pic. 3.webp" data-title="Vibrant Performance: 'Haiyo Re Maaro jor Hey Allah Hey Rama'" data-year="1995" tabindex="0" role="button" aria-label="View Vibrant Performance: 'Haiyo Re Maaro jor Hey Allah Hey Rama' (1995)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 3.jpeg" alt="Vibrant Performance: 'Haiyo Re Maaro jor Hey Allah Hey Rama'" loading="eager" fetchpriority="high" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 3.webp" alt="Vibrant Performance: 'Haiyo Re Maaro jor Hey Allah Hey Rama'" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Vibrant Performance: 'Haiyo Re Maaro jor Hey Allah Hey Rama'</h4>
@@ -901,9 +904,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 2.jpeg" data-full="assets/Gallery/Pic. 2.jpeg" data-title="Expressive Dance Drama: 'Kalmrigaya' Presentation" data-year="1994" tabindex="0" role="button" aria-label="View Expressive Dance Drama: 'Kalmrigaya' Presentation (1994)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 2.webp" data-full="assets/Gallery/Pic. 2.webp" data-title="Expressive Dance Drama: 'Kalmrigaya' Presentation" data-year="1994" tabindex="0" role="button" aria-label="View Expressive Dance Drama: 'Kalmrigaya' Presentation (1994)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 2.jpeg" alt="Expressive Dance Drama: 'Kalmrigaya' Presentation" loading="eager" fetchpriority="high" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 2.webp" alt="Expressive Dance Drama: 'Kalmrigaya' Presentation" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Expressive Dance Drama: 'Kalmrigaya' Presentation</h4>
@@ -912,9 +915,9 @@
               </div>
             </div>
           </div>
-          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 1.jpeg" data-full="assets/Gallery/Pic. 1.jpeg" data-title="Classical Elegance: 'Chhom Chhom Baje Re Payeliya' Performance" data-year="1990" tabindex="0" role="button" aria-label="View Classical Elegance: 'Chhom Chhom Baje Re Payeliya' Performance (1990)">
+          <div class="gallery-photo-card" data-img="assets/Gallery/thumbs/Pic. 1.webp" data-full="assets/Gallery/Pic. 1.webp" data-title="Classical Elegance: 'Chhom Chhom Baje Re Payeliya' Performance" data-year="1990" tabindex="0" role="button" aria-label="View Classical Elegance: 'Chhom Chhom Baje Re Payeliya' Performance (1990)">
             <div class="gallery-photo-wrapper">
-              <img src="assets/Gallery/thumbs/Pic. 1.jpeg" alt="Classical Elegance: 'Chhom Chhom Baje Re Payeliya' Performance" loading="eager" fetchpriority="high" decoding="async">
+              <img src="assets/Gallery/thumbs/Pic. 1.webp" alt="Classical Elegance: 'Chhom Chhom Baje Re Payeliya' Performance" loading="lazy" decoding="async">
               <div class="gallery-photo-overlay">
                 <div class="gallery-card-content">
                   <h4 class="gallery-card-caption">Classical Elegance: 'Chhom Chhom Baje Re Payeliya' Performance</h4>
@@ -945,7 +948,7 @@
           <div class="spotlight-badge"><i class="fa-solid fa-crown text-gold"></i> Featured Senior Scholar</div>
           <div class="spotlight-content-grid">
             <div class="spotlight-avatar-box">
-              <img src="./assets/Testimonial/Kalyan Bakshi.jpeg" alt="Sreemoyee Mukherjee" class="spotlight-avatar-img" loading="lazy" decoding="async">
+              <img src="assets/Testimonial/Kalyan Bakshi.webp" alt="Sreemoyee Mukherjee" class="spotlight-avatar-img" loading="lazy" decoding="async">
               <div class="spotlight-rating">
                 <i class="fa-solid fa-star"></i>
                 <i class="fa-solid fa-star"></i>
@@ -996,7 +999,7 @@
             </p>
             <br>
             <div class="card-profile">
-              <img src="./assets/Testimonial/Arundhati Saha.jpeg" alt="Arundhati Saha" class="card-avatar" loading="lazy" decoding="async">
+              <img src="assets/Testimonial/Arundhati Saha.webp" alt="Arundhati Saha" class="card-avatar" loading="lazy" decoding="async">
               <div>
                 <h5 class="profile-name">Arundhati Saha</h5>
                 <span class="profile-role">SECRETARY, PURBI SANGEET-O-KALA KENDRA</span>
@@ -1017,7 +1020,7 @@
             <p class="card-quote">Dance is the joy of movement and the heart of life. This dancing institute and its dancers are truly exceptional! The level of talent, discipline, and passion they display is inspiring. Each performance reflects not only their technical skill but also their dedication to the art form. It's clear that the instructors foster a nurturing environment where creativity and hard work thrive. A truly remarkable place for both aspiring and seasoned dancers.</p>
             <br>
             <div class="card-profile">
-              <img src="./assets/Testimonial/Akash Chakraborty.jpeg" alt="Akash Chakraborty" class="card-avatar" loading="lazy" decoding="async">
+              <img src="assets/Testimonial/Akash Chakraborty.webp" alt="Akash Chakraborty" class="card-avatar" loading="lazy" decoding="async">
               <div>
                 <h5 class="profile-name">Akash Chakraborty</h5>
                 <span class="profile-role">PROFESSOR, RAMAKRISHNA MISSION SHILPAMANDIRA COMPUTER CENTRE</span>
@@ -1330,7 +1333,7 @@
             <div class="map-box-header">
               <div style="display: flex; align-items: center; gap: 14px;">
                 <div class="logo-glow-wrapper" style="width: 110px; height: 110px; aspect-ratio: 1/1;">
-                  <img src="assets/natraj_logo.jpg" alt="Logo" style="width: 110px; height: 110px; aspect-ratio: 1/1;">
+                  <img src="assets/natraj_logo.webp" alt="Logo" style="width: 110px; height: 110px; aspect-ratio: 1/1;">
                 </div>
                 <div>
                   <h4 style="font-family: var(--font-royal); font-size: 1.3rem; color: var(--text-main); font-weight: 800; line-height: 1.1;">Nataraj Nritya Mandir</h4>
@@ -1363,6 +1366,7 @@
       </div>
     </section>
   </div>
+  </main>
 
   <!-- ==========================================================================
        FOOTER (OFFICIAL BRAND SOCIAL ICONS)
@@ -1373,7 +1377,7 @@
         <div class="footer-brand">
           <div class="nav-brand" style="margin-bottom: 1.4rem;">
             <div class="logo-glow-wrapper" style="width: 130px; height: 130px; aspect-ratio: 1/1;">
-              <img src="assets/natraj_logo.jpg" alt="Natraj Logo" style="width: 130px; height: 130px; aspect-ratio: 1/1;">
+              <img src="assets/natraj_logo.webp" alt="Natraj Logo" style="width: 130px; height: 130px; aspect-ratio: 1/1;">
             </div>
             <div class="brand-text-container">
               <span class="brand-name" style="font-size: 1.7rem;">Nataraj Nritya Mandir</span>
@@ -1481,13 +1485,13 @@
       <div class="receipt-card voucher-print-area" style="position: relative; overflow: hidden;">
         <!-- Watermark -->
         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.06; pointer-events: none; z-index: 0;">
-          <img src="assets/natraj_logo.jpg" alt="Watermark" style="width: 300px; height: 300px; border-radius: 50%; filter: grayscale(100%);">
+          <img src="assets/natraj_logo.webp" alt="Watermark" style="width: 300px; height: 300px; border-radius: 50%; filter: grayscale(100%);">
         </div>
         
         <div style="position: relative; z-index: 1;">
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--neon-gold); padding-bottom: 1rem; margin-bottom: 1.5rem;">
           <div style="display: flex; align-items: center; gap: 12px;">
-            <img src="assets/natraj_logo.jpg" alt="Logo" style="width: 50px; height: 50px; border-radius: 50%; border: 1.5px solid var(--neon-gold); object-fit: cover;">
+            <img src="assets/natraj_logo.webp" alt="Logo" style="width: 50px; height: 50px; border-radius: 50%; border: 1.5px solid var(--neon-gold); object-fit: cover;">
             <div>
               <span style="font-weight: 900; color: var(--text-main); font-size: 1.3rem; display: block; text-align: left; font-family: var(--font-royal); text-transform: uppercase;">Nataraj Nritya Mandir</span>
               <span style="font-weight: 800; color: var(--neon-gold-bright); font-size: 1.05rem; display: block; text-align: left;">OFFICIAL ENROLLMENT VOUCHER</span>
@@ -1525,7 +1529,7 @@
       <div class="voucher-next-steps">
         <div class="voucher-next-steps-icon"><i class="fa-solid fa-clipboard-list"></i></div>
         <div>
-          <h4 class="voucher-next-steps-title">&#9888; Next Steps â€” Action Required</h4>
+          <h4 class="voucher-next-steps-title">&#9888; Next Steps &mdash; Action Required</h4>
           <p class="voucher-next-steps-text">Please <strong>print this voucher</strong> and visit the academy with the student. You must bring: <strong>1)</strong> Two Passport-size photographs, <strong>2)</strong> A photocopy of the Birth Certificate <em>OR</em> Aadhaar Card, and <strong>3)</strong> The One-Time Admission Fee of <strong>&#8377;800</strong>. <em>Admission is successful only after submitting these.</em></p>
         </div>
       </div>
@@ -1679,11 +1683,11 @@
 
   <!-- Floating Toast Feedback Notification -->
   <div id="contact-toast" style="position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(18, 14, 52, 0.95); color: #FFFFFF; border: 1.5px solid var(--neon-gold); padding: 12px 24px; border-radius: 9999px; font-weight: 700; font-size: 0.92rem; z-index: 100000; box-shadow: 0 10px 35px var(--gold-glow); transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease; opacity: 0; pointer-events: none; display: flex; align-items: center; gap: 10px;">
-    <span id="toast-icon">ðŸ“ž</span> <span id="toast-text">Telephone copied to clipboard!</span>
+    <span id="toast-icon">&#128222;</span> <span id="toast-text">Telephone copied to clipboard!</span>
   </div>
 
   <!-- JavaScript Engine -->
-  <script src="script.js"></script>
+  <script src="script.js" defer></script>
 </body>
 </html>
 

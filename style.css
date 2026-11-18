@@ -171,6 +171,7 @@ body[data-theme="light"]::before {
   height: 100vh;
   z-index: -2;
   pointer-events: none;
+  contain: layout style paint;
 }
 
 /* Cursor Glow Follower */
@@ -5548,7 +5549,8 @@ html {
 }
 
 /* Task 1: Hardware-Accelerated Fade-In-Up Reveal */
-.scroll-reveal {
+.scroll-reveal,
+.reveal-item {
   opacity: 0;
   transform: translateY(30px) translateZ(0);
   transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
@@ -5560,16 +5562,19 @@ html {
 
 /* While not yet revealed, ensure it remains hidden even inside active tabs */
 .scroll-reveal:not(.revealed),
-.page-view.active .scroll-reveal:not(.revealed) {
+.reveal-item:not(.is-visible),
+.page-view.active .scroll-reveal:not(.revealed),
+.page-view.active .reveal-item:not(.is-visible) {
   opacity: 0 !important;
   transform: translateY(30px) translateZ(0) !important;
 }
 
-/* Once revealed: Permanently lock in place and release GPU composite layer */
-.scroll-reveal.revealed {
+/* Once revealed: Permanently lock in place and release GPU composite layer (prevents tile memory overload & blinking) */
+.scroll-reveal.revealed,
+.reveal-item.is-visible {
   opacity: 1 !important;
-  transform: translateY(0) translateZ(0);
-  will-change: auto;
+  transform: translateY(0) translateZ(0) !important;
+  will-change: auto !important;
 }
 
 /* Task 2: Cascading Stagger Delays for Grids */
@@ -5738,6 +5743,32 @@ html {
   }
 }
 
+/* ==========================================================================
+   MOBILE PERFORMANCE, UI & SYMMETRICAL ALIGNMENT FIXES (<= 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* Task 2: Hide ONLY the extra Nataraj Nritya Mandir circular logo in About Us section on mobile */
+  .about-card-glow .about-extra-logo,
+  .about-card-glow .logo-glow-wrapper:has(img[alt*="Natraj Official Academy Emblem"]) {
+    display: none !important;
+  }
 
+  /* Task 5: Mobile Testimonials Symmetrical Full-Width Alignment (Arundhati Saha, Akash Chakraborty, etc.) */
+  .testimonials-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 1.5rem !important;
+  }
 
-
+  .testimonials-grid > .testimonial-card,
+  .testimonials-grid > * {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box !important;
+  }
+}

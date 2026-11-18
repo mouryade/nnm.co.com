@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Application Successful | Nataraj Nritya Mandir</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -94,6 +94,7 @@
       inset: 0;
       z-index: 1;
       pointer-events: none;
+      contain: layout style paint;
     }
 
     /* =========================================================================
@@ -445,18 +446,18 @@
   <canvas id="particles-canvas"></canvas>
 
   <!-- Hidden audio element -->
-  <audio id="bg-audio" preload="auto" loop>
+  <audio id="bg-audio" preload="none" loop>
     <source src="assets/Rabindra_Sangeet.mp3" type="audio/mpeg">
   </audio>
 
   <!-- Centered page content -->
-  <div class="page-wrapper">
-    <div class="success-card" role="main">
+  <main class="page-wrapper">
+    <div class="success-card">
 
       <!-- Logos row: Nataraj Logo & Madam Photo centered -->
       <div class="logos-row" aria-hidden="true">
-        <img src="assets/natraj_logo.jpg" alt="Nataraj Nritya Mandir" class="logo-circle">
-        <img src="assets/Madam.jpg"        alt="Smt. Sankari De"      class="founder-img">
+        <img src="assets/natraj_logo.webp" alt="Nataraj Nritya Mandir" class="logo-circle" width="100" height="100">
+        <img src="assets/Madam.webp"        alt="Smt. Sankari De"      class="founder-img"  width="100" height="100">
       </div>
 
       <!-- Checkmark -->
@@ -496,7 +497,7 @@
       </button>
 
     </div><!-- /.success-card -->
-  </div><!-- /.page-wrapper -->
+  </main><!-- /.page-wrapper -->
 
   <!-- Fixed music toggle widget -->
   <div class="music-widget" id="music-widget"
@@ -523,8 +524,10 @@
     var particles = [];
 
     function resize() {
-      canvas.width  = window.innerWidth;
-      canvas.height = window.innerHeight;
+      var isMobile = window.innerWidth <= 992;
+      var dpr = isMobile ? Math.min(window.devicePixelRatio || 1, 1.25) : 1;
+      canvas.width  = Math.round(window.innerWidth * dpr);
+      canvas.height = Math.round(window.innerHeight * dpr);
     }
     window.addEventListener('resize', resize, { passive: true });
     resize();
@@ -612,7 +615,7 @@
   var audio      = document.getElementById('bg-audio');
   var widget     = document.getElementById('music-widget');
   var lbl        = document.getElementById('music-label');
-  var TARGET_VOL = 0.12;
+  var TARGET_VOL = 0.04; // 4% ultra-soft whisper tune
 
   // Safe localStorage helpers (never throw)
   function lsGet(k, def) {
