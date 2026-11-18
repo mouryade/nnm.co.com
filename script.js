@@ -513,8 +513,8 @@ function initClassicalAudioPlayer() {
 
   if (!audio || !musicWidget) return;
 
-  // Smooth, soft and balanced ambient background volume for desktop and mobile
-  const TARGET_VOLUME = 0.12;
+  // Ultra-soft whisper-quiet ambient background volume for desktop and mobile (4% soft low tune)
+  const TARGET_VOLUME = 0.04;
   audio.volume = TARGET_VOLUME;
   audio.loop = true;
 
@@ -639,10 +639,10 @@ function initClassicalAudioPlayer() {
   function updateWidgetUI() {
     if (audio && !audio.paused && !audio.muted) {
       musicWidget.classList.add('playing');
-      if (musicStatusText) musicStatusText.innerText = '🎵 Music: ON';
+      if (musicStatusText) musicStatusText.innerHTML = '&#127925; Music: ON';
     } else {
       musicWidget.classList.remove('playing');
-      if (musicStatusText) musicStatusText.innerText = '🔇 Music: MUTED';
+      if (musicStatusText) musicStatusText.innerHTML = '&#128263; Music: MUTED';
     }
   }
 
@@ -2122,7 +2122,7 @@ function showContactToast(icon, text) {
   const toastText = document.getElementById('toast-text');
   if (!toast) return;
 
-  if (toastIcon) toastIcon.textContent = icon;
+  if (toastIcon) toastIcon.innerHTML = icon;
   if (toastText) toastText.textContent = text;
 
   toast.style.opacity = '1';
@@ -2143,9 +2143,9 @@ function showContactToast(icon, text) {
 function copyToClipboardAndToast(text, label) {
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text).then(() => {
-      showContactToast('📋', `${label} copied to clipboard!`);
+      showContactToast('&#128203;', `${label} copied to clipboard!`);
     }).catch(() => {
-      showContactToast('📋', `${text}`);
+      showContactToast('&#128203;', `${text}`);
     });
   } else {
     try {
@@ -2155,9 +2155,9 @@ function copyToClipboardAndToast(text, label) {
       tempInput.select();
       document.execCommand('copy');
       document.body.removeChild(tempInput);
-      showContactToast('📋', `${label} copied to clipboard!`);
+      showContactToast('&#128203;', `${label} copied to clipboard!`);
     } catch(err) {
-      showContactToast('📋', `${text}`);
+      showContactToast('&#128203;', `${text}`);
     }
   }
 }
@@ -2206,7 +2206,7 @@ function dialTelephoneNumber(phone = '03326797750') {
   }
 
   // 2. Instant toast feedback
-  showContactToast('📞', `Calling Nataraj Nritya Mandir (${phone.includes('033') ? '033 2679 7750' : phone})...`);
+  showContactToast('&#128222;', `Calling Nataraj Nritya Mandir (${phone.includes('033') ? '033 2679 7750' : phone})...`);
 
   // 3. Attempt native tel: protocol navigation (triggers mobile device dial pad on handsets)
   try {
@@ -2383,7 +2383,7 @@ function initContactActions() {
   modalCallLinks.forEach((link) => {
     link.addEventListener('click', () => {
       const num = link.getAttribute('href').replace('tel:', '');
-      showContactToast('📞', `Connecting call to ${num}...`);
+      showContactToast('&#128222;', `Connecting call to ${num}...`);
     });
   });
 
@@ -2494,28 +2494,28 @@ function initScrollReveal() {
   // Graceful fallback for ancient browsers or minimal environments without IntersectionObserver
   if (!('IntersectionObserver' in window)) {
     elements.forEach((el) => {
-      el.classList.add('revealed');
+      el.classList.add('revealed', 'is-visible');
     });
     return;
   }
 
   // Assign scroll-reveal class to all unrevealed elements
   elements.forEach((el) => {
-    if (!el.classList.contains('revealed')) {
+    if (!el.classList.contains('revealed') && !el.classList.contains('is-visible')) {
       el.classList.add('scroll-reveal');
     }
   });
 
   const observerOptions = {
     root: null,
-    rootMargin: '0px 0px -30px 0px',
-    threshold: 0.08
+    rootMargin: '0px 0px -10px 0px',
+    threshold: 0.05
   };
 
   const observer = new IntersectionObserver((entries, obs) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        entry.target.classList.add('revealed');
+        entry.target.classList.add('revealed', 'is-visible');
         // STRICT ONCE UX RULE: unobserve immediately so it stays revealed forever
         obs.unobserve(entry.target);
       }
@@ -2525,7 +2525,7 @@ function initScrollReveal() {
   window.scrollRevealObserver = observer;
 
   elements.forEach((el) => {
-    if (!el.classList.contains('revealed')) {
+    if (!el.classList.contains('revealed') && !el.classList.contains('is-visible')) {
       observer.observe(el);
     }
   });
@@ -2538,7 +2538,7 @@ function initScrollReveal() {
     pending.forEach((el) => {
       const rect = el.getBoundingClientRect();
       if (rect.top < vh && rect.bottom > 0) {
-        el.classList.add('revealed');
+        el.classList.add('revealed', 'is-visible');
         observer.unobserve(el);
       } else {
         observer.observe(el);
