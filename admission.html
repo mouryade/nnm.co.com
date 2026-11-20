@@ -1,12 +1,47 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Application Successful | Nataraj Nritya Mandir</title>
+  <title>Nataraj Nritya Mandir</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+ 
+  <!-- 3-Tier Adaptive Performance Pre-Paint Detection Engine (Zero-Jank Hardware Scaler) -->
+  <script>
+    (function() {
+      try {
+        var cached = sessionStorage.getItem('nnm_perf_tier');
+        if (cached === 'tier-ultra-lite') {
+          document.documentElement.classList.add('tier-ultra-lite');
+          return;
+        }
+        var sw = (window.screen && window.screen.width) ? window.screen.width : window.innerWidth;
+        var ua = navigator.userAgent || '';
+        var isKeypadOrTiny = sw <= 320 || /KaiOS|JioPhone|Opera Mini|UCBrowser/i.test(ua);
+        var isMobileWidth = window.innerWidth <= 992;
+        var mem = navigator.deviceMemory;
+        var cores = navigator.hardwareConcurrency;
+        var isLowHardware = isMobileWidth && ((mem && mem <= 4) || (cores && cores <= 4));
+        var prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var isDataSaver = navigator.connection && navigator.connection.saveData;
+        var noIO = !('IntersectionObserver' in window);
+
+        var tier;
+        if (isKeypadOrTiny || isLowHardware || prefersReducedMotion || isDataSaver || noIO) {
+          tier = 'tier-ultra-lite';
+        } else if (isMobileWidth || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches)) {
+          tier = 'tier-balanced';
+        } else {
+          tier = 'tier-full';
+        }
+        document.documentElement.classList.add(tier);
+      } catch (e) {
+        document.documentElement.classList.add('tier-balanced');
+      }
+    })();
+  </script>
 
   <style>
     /* =========================================================================
@@ -440,6 +475,51 @@
       .checkmark-wrap { margin-bottom: 6px; }
       .divider { margin: 8px 0; }
     }
+
+    /* 3-Tier Adaptive Performance Overrides */
+    html.tier-balanced .success-card,
+    html.tier-ultra-lite .success-card {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      background: rgba(14, 12, 27, 0.96) !important;
+    }
+
+    html.tier-balanced .music-widget,
+    html.tier-ultra-lite .music-widget {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      background: rgba(14, 12, 27, 0.95) !important;
+    }
+
+    html.tier-ultra-lite #particles-canvas {
+      display: none !important;
+    }
+
+    html.tier-ultra-lite body::before {
+      animation: none !important;
+    }
+
+    html.tier-ultra-lite .music-widget.playing .eq-bar,
+    html.tier-ultra-lite .status-badge::before {
+      animation: none !important;
+    }
+
+    @media (max-width: 340px), (max-height: 400px) {
+      .page-wrapper {
+        padding: 8px 6px !important;
+        overflow-x: hidden !important;
+      }
+      .success-card {
+        padding: 14px 10px !important;
+        border-radius: 12px !important;
+      }
+      h1 { font-size: 1.25rem !important; }
+      .music-widget {
+        bottom: 6px !important;
+        right: 6px !important;
+        padding: 4px 8px !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -521,9 +601,20 @@
      ============================================================ */
   (function initParticles() {
     var canvas = document.getElementById('particles-canvas');
+    if (!canvas) return;
+
+    // Tier 3: Zero-Lag Budget / Keypad Phones - disable canvas entirely
+    if (document.documentElement.classList.contains('tier-ultra-lite')) {
+      canvas.style.display = 'none';
+      return;
+    }
+
     var ctx = canvas.getContext('2d');
-    var COUNT = window.innerWidth < 600 ? 45 : 80;
+    var isTierBalanced = document.documentElement.classList.contains('tier-balanced');
+    var COUNT = isTierBalanced ? 26 : (window.innerWidth < 600 ? 45 : 80);
     var particles = [];
+    var lastTickTime = 0;
+    var balancedFrameInterval = 1000 / 24;
 
     function resize() {
       canvas.width  = window.innerWidth;
@@ -549,7 +640,20 @@
 
     for (var i = 0; i < COUNT; i++) particles.push(makeParticle(true));
 
-    function tick() {
+    function tick(timestamp) {
+      if (document.documentElement.classList.contains('tier-ultra-lite')) {
+        canvas.style.display = 'none';
+        return;
+      }
+
+      if (isTierBalanced) {
+        if (timestamp - lastTickTime < balancedFrameInterval) {
+          requestAnimationFrame(tick);
+          return;
+        }
+        lastTickTime = timestamp;
+      }
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       for (var j = 0; j < particles.length; j++) {
         var p = particles[j];
@@ -564,8 +668,10 @@
         ctx.save();
         ctx.globalAlpha = Math.max(0, p.a);
         ctx.fillStyle = 'hsl(' + (44 + Math.random() * 12) + ',90%,68%)';
-        ctx.shadowColor = 'rgba(212,175,55,0.8)';
-        ctx.shadowBlur  = 6;
+        if (!isTierBalanced) {
+          ctx.shadowColor = 'rgba(212,175,55,0.8)';
+          ctx.shadowBlur  = 6;
+        }
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
         ctx.fill();
@@ -573,7 +679,7 @@
       }
       requestAnimationFrame(tick);
     }
-    tick();
+    requestAnimationFrame(tick);
   }());
 
   /* ============================================================
