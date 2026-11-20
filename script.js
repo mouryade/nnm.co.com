@@ -627,12 +627,11 @@ function initFPSWatchdog() {
     // If downgraded while waiting for start, exit
     if (document.documentElement.classList.contains('tier-ultra-lite')) return;
 
-    let frameCount = 0;
-    let slowFrames = 0;
+    let severeFreezeFrames = 0;
     let startTime = null;
     let lastFrameTime = null;
     let watchdogRafId = null;
-    const DURATION = 2500; // 2.5 seconds evaluation window
+    const DURATION = 4000; // 4.0 seconds evaluation window
 
     function checkFrame(now) {
       if (!startTime) {
@@ -659,27 +658,23 @@ function initFPSWatchdog() {
         return;
       }
 
-      frameCount++;
-      if (delta > 85) {
-        slowFrames++;
+      // Track genuine main-thread freeze frames (> 120ms, < 500ms)
+      // Note: On 90Hz/120Hz screens with AdaptiveSync, idle displays drop refresh rate to save power.
+      // We NEVER downgrade on idle low FPS; only count severe interaction/animation freeze frames (>120ms).
+      if (delta > 120) {
+        severeFreezeFrames++;
       }
 
       const elapsed = now - startTime;
 
-      // Early downgrade trigger if sustained frame drops detected (>= 4 frames > 85ms across continuous active frames)
-      if (slowFrames >= 4) {
-        triggerDowngrade('Multiple heavy frame drops (>85ms) detected');
+      // Early downgrade trigger if sustained severe freeze frames detected (>= 8 severe freeze frames within window)
+      if (severeFreezeFrames >= 8) {
+        triggerDowngrade('Multiple severe main-thread freeze frames (>120ms) detected');
         return;
       }
 
       if (elapsed < DURATION) {
         watchdogRafId = requestAnimationFrame(checkFrame);
-      } else {
-        // 2.5 seconds completed, calculate average FPS
-        const avgFPS = (frameCount * 1000) / elapsed;
-        if (avgFPS < 25) {
-          triggerDowngrade('Average FPS (' + avgFPS.toFixed(1) + ') below 25 FPS threshold');
-        }
       }
     }
 
@@ -700,7 +695,7 @@ function initFPSWatchdog() {
       document.documentElement.setAttribute('data-perf-tier', 'tier-ultra-lite');
 
       try {
-        localStorage.setItem('nnm_perf_tier_v3', 'tier-ultra-lite');
+        localStorage.setItem('nnm_perf_tier_v4', 'tier-ultra-lite');
       } catch (e) {}
 
       // Stop canvas animation loop immediately
@@ -801,20 +796,34 @@ function initClassicalAudioPlayer() {
     } catch(err) {}
   }
 
-  // Update Widget UI directly based on User Preference
+  // Update Widget UI directly based on User Preference & Playback State
   function updateWidgetUI() {
     const pref = getMusicPref();
     document.documentElement.setAttribute('data-music-pref', pref);
-    if (pref === 'on') {
+    if (pref === 'off') {
+      musicWidget.classList.remove('playing', 'music-waiting-tap');
+      musicWidget.setAttribute('aria-pressed', 'false');
+      if (musicStatusText) musicStatusText.innerHTML = '&#128263; Music: OFF';
+    } else if (audio && !audio.paused) {
       musicWidget.classList.add('playing');
+      musicWidget.classList.remove('music-waiting-tap');
       musicWidget.setAttribute('aria-pressed', 'true');
       if (musicStatusText) musicStatusText.innerHTML = '&#127925; Music: ON';
     } else {
       musicWidget.classList.remove('playing');
+      musicWidget.classList.add('music-waiting-tap');
       musicWidget.setAttribute('aria-pressed', 'false');
-      if (musicStatusText) musicStatusText.innerHTML = '&#128263; Music: OFF';
+      if (musicStatusText) musicStatusText.innerHTML = '&#127925; Tap for Music';
     }
   }
+
+  // Synchronize widget state with native audio events
+  audio.addEventListener('play', updateWidgetUI);
+  audio.addEventListener('playing', () => {
+    removeGestureListeners();
+    updateWidgetUI();
+  });
+  audio.addEventListener('pause', updateWidgetUI);
 
   // One-time safe position restoration (prevents loop seek-traps)
   let hasRestoredInitialTime = false;
@@ -910,7 +919,8 @@ function initClassicalAudioPlayer() {
 
   // Global Gesture Fallback for Mobile Autoplay Restrictions
   let gestureActive = false;
-  const gestureEvents = ['pointerdown', 'touchstart', 'click', 'keydown'];
+  let isUnlocking = false;
+  const gestureEvents = ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'click', 'keydown', 'scroll'];
 
   function removeGestureListeners() {
     if (!gestureActive) return;
@@ -932,30 +942,31 @@ function initClassicalAudioPlayer() {
   }
 
   function onFirstGesture(e) {
-    // Prevent interfering if user directly clicked the music widget
-    if (e && e.target && e.target.closest && e.target.closest('#music-toggle-widget')) return;
-
-    if (getMusicPref() === 'on') {
-      if (!hasRestoredInitialTime) restorePlaybackTime();
-      audio.muted = false;
-      audio.volume = TARGET_VOLUME;
-      const p = audio.play();
-      if (p && typeof p.then === 'function') {
-        p.then(() => {
-          removeGestureListeners();
-        }).catch(() => {});
-      }
-    } else {
+    if (getMusicPref() !== 'on') {
       removeGestureListeners();
+      return;
+    }
+    if (!audio || !audio.paused || isUnlocking) return;
+    isUnlocking = true;
+
+    if (!hasRestoredInitialTime) restorePlaybackTime();
+    audio.muted = false;
+    audio.volume = TARGET_VOLUME;
+    const p = audio.play();
+    if (p && typeof p.then === 'function') {
+      p.then(() => {
+        removeGestureListeners();
+        isUnlocking = false;
+        updateWidgetUI();
+      }).catch(() => {
+        isUnlocking = false;
+        updateWidgetUI();
+      });
+    } else {
+      isUnlocking = false;
+      updateWidgetUI();
     }
   }
-
-  // Once audio successfully starts playing, clean up gesture listeners
-  audio.addEventListener('playing', () => {
-    if (getMusicPref() === 'on') {
-      removeGestureListeners();
-    }
-  });
 
   function playAudio() {
     if (getMusicPref() !== 'on') {
@@ -976,11 +987,15 @@ function initClassicalAudioPlayer() {
       playPromise
         .then(() => {
           removeGestureListeners();
+          updateWidgetUI();
         })
         .catch(() => {
-          // Autoplay blocked by mobile browser - UI stays ON, attach gesture fallback
+          // Autoplay blocked by mobile browser - show Tap for Music, attach gesture fallback
           attachGestureFallback();
+          updateWidgetUI();
         });
+    } else {
+      updateWidgetUI();
     }
   }
 
@@ -1004,12 +1019,12 @@ function initClassicalAudioPlayer() {
       e.stopPropagation();
       if (e.preventDefault) e.preventDefault();
     }
-    if (getMusicPref() === 'on') {
+    const pref = getMusicPref();
+    if (pref === 'on' && audio && !audio.paused) {
       setMusicPref('off');
       pauseAudio();
     } else {
       setMusicPref('on');
-      updateWidgetUI();
       playAudio();
     }
   }
