@@ -42,6 +42,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // 11b. Ultra-Optimized Reveal on Scroll (Fade-In-Up) Intersection Observer
   initScrollReveal();
 
+  // Safety pass 350ms after initial mount to guarantee zero blank sections
+  setTimeout(() => {
+    if (typeof window.runScrollRevealFailsafe === 'function') {
+      window.runScrollRevealFailsafe();
+    }
+  }, 350);
+
   // 12. Browser Back-Button Trap (Prevents returning to success page after returning to website)
   if (sessionStorage.getItem('nnm_success_returned') === 'true') {
     window.history.pushState(null, document.title, window.location.href);
@@ -180,10 +187,34 @@ function initMobileNavigationDrawer() {
 function initSPARouter() {
   const pageViews = document.querySelectorAll('.page-view');
   const allNavLinks = document.querySelectorAll('.nav-link, .mobile-drawer-link, [data-navigate], .mbar-btn');
+  let currentActivePageId = null;
 
   function navigateTo(pageId) {
     if (!pageId) pageId = 'home';
     pageId = pageId.replace('#', '');
+
+    // Refinement 3: Clicking the already-active tab should just scroll to top without re-hiding visible content
+    if (currentActivePageId && pageId === currentActivePageId) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    const isDifferentPage = currentActivePageId !== null && pageId !== currentActivePageId;
+    const isUltraLite = document.documentElement.classList.contains('tier-ultra-lite');
+
+    // If navigating to a DIFFERENT page, disconnect observer and reset unrevealed elements on target
+    if (isDifferentPage) {
+      if (window.scrollRevealObserver) {
+        window.scrollRevealObserver.disconnect();
+      }
+      if (!isUltraLite) {
+        document.querySelectorAll('.page-view[data-page-view="' + pageId + '"]').forEach((targetView) => {
+          targetView.querySelectorAll('.scroll-reveal, .reveal-item').forEach((el) => {
+            el.classList.remove('revealed', 'is-visible');
+          });
+        });
+      }
+    }
 
     let found = false;
     pageViews.forEach((view) => {
@@ -199,6 +230,9 @@ function initSPARouter() {
       pageViews[0].classList.add('active');
       pageId = 'home';
     }
+
+    // Clean up pre-paint instant route attribute once SPA router takes over
+    document.documentElement.removeAttribute('data-init-route');
 
     // STATE PERSISTENCE: Remember active section across page reloads
     try {
@@ -237,12 +271,32 @@ function initSPARouter() {
       setTimeout(window.layoutGalleryMasonry, 60);
     }
 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Instant Scroll-to-Top BEFORE Revealing Incoming Page (Zero bottom-to-top sweep)
+    document.documentElement.style.scrollBehavior = 'auto';
+    document.body.style.scrollBehavior = 'auto';
+    window.scrollTo(0, 0);
+    requestAnimationFrame(() => {
+      document.documentElement.style.scrollBehavior = '';
+      document.body.style.scrollBehavior = '';
+    });
 
-    // Synchronize scroll-reveal state on tab switch
+    currentActivePageId = pageId;
+
+    // Synchronize scroll-reveal state on tab switch with double requestAnimationFrame
     if (typeof window.refreshScrollReveal === 'function') {
-      setTimeout(window.refreshScrollReveal, 80);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          window.refreshScrollReveal();
+        });
+      });
     }
+
+    // Safety pass 350ms after navigateTo to guarantee zero blank sections
+    setTimeout(() => {
+      if (typeof window.runScrollRevealFailsafe === 'function') {
+        window.runScrollRevealFailsafe();
+      }
+    }, 350);
   }
 
   window.addEventListener('hashchange', () => {
@@ -330,18 +384,24 @@ function resetCaptcha(type) {
 function initThemeManager() {
   const themeToggleBtns = document.querySelectorAll('.theme-toggle-btn');
   
-  // Clear legacy persistent localStorage to ensure closing/re-opening site resets to Light Mode
+  // Persistent Theme: Read from localStorage (with sessionStorage fallback)
+  let activeTheme = 'light';
   try {
-    localStorage.removeItem('nnm_theme');
+    activeTheme = localStorage.getItem('nnm_theme') || sessionStorage.getItem('nnm_session_theme') || 'light';
   } catch (e) {}
-
-  // SessionStorage retains theme across page refreshes within current tab session.
-  // Closing and re-opening the tab/browser automatically clears sessionStorage, defaulting back to Vibrant Light Day Theme.
-  const activeSessionTheme = sessionStorage.getItem('nnm_session_theme') || 'light';
 
   function setTheme(theme) {
     document.body.setAttribute('data-theme', theme);
-    sessionStorage.setItem('nnm_session_theme', theme);
+    document.documentElement.setAttribute('data-theme', theme);
+    try {
+      localStorage.setItem('nnm_theme', theme);
+      sessionStorage.setItem('nnm_session_theme', theme);
+    } catch (e) {}
+
+    // Synchronize canvas petal palette immediately on theme switch
+    if (typeof window.updateCanvasPalette === 'function') {
+      window.updateCanvasPalette();
+    }
 
     themeToggleBtns.forEach((btn) => {
       const icon = btn.querySelector('i');
@@ -357,12 +417,19 @@ function initThemeManager() {
     });
   }
 
-  // Force Vibrant Light Day Theme as default on initial load/session start
-  setTheme(activeSessionTheme);
+  // Apply active theme immediately
+  setTheme(activeTheme);
+
+  // Remove initial-paint transition lock after DOM hydration
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.documentElement.classList.remove('no-theme-transition');
+    });
+  });
 
   themeToggleBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
-      const current = document.body.getAttribute('data-theme');
+      const current = document.body.getAttribute('data-theme') || document.documentElement.getAttribute('data-theme') || 'light';
       const nextTheme = current === 'light' ? 'dark' : 'light';
       setTheme(nextTheme);
     });
@@ -411,15 +478,23 @@ function initLotusCanvas() {
     return window.innerWidth <= 768 ? 32 : 75;
   }
 
+  const lightPetalColors = ['#D4AF37', '#E91E63', '#00BCD4', '#8E24AA', '#B8860B', '#FF4081'];
+  const darkPetalColors = ['#FFD700', '#FFE566', '#FF5C93', '#FF85B3', '#FFF4D2', '#FF4081'];
+
+  function getPalette() {
+    return document.documentElement.getAttribute('data-theme') === 'dark' ? darkPetalColors : lightPetalColors;
+  }
+
   function createParticles() {
     particles.length = 0;
     const count = getOptimalParticleCount();
+    const palette = getPalette();
     for (let i = 0; i < count; i++) {
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
         radius: Math.random() * 3 + 1,
-        color: ['#D4AF37', '#E91E63', '#00BCD4', '#8E24AA', '#B8860B', '#FF4081'][Math.floor(Math.random() * 6)],
+        color: palette[Math.floor(Math.random() * palette.length)],
         alpha: Math.random() * 0.75 + 0.2,
         speedY: Math.random() * 0.9 + 0.3,
         speedX: Math.sin(Math.random() * Math.PI) * 0.5,
@@ -430,6 +505,14 @@ function initLotusCanvas() {
       });
     }
   }
+
+  // Expose global updater so theme changes immediately swap petal colors
+  window.updateCanvasPalette = function() {
+    const palette = getPalette();
+    particles.forEach((p) => {
+      p.color = palette[Math.floor(Math.random() * palette.length)];
+    });
+  };
 
   createParticles();
 
@@ -492,7 +575,7 @@ function initLotusCanvas() {
     }
 
     ctx.clearRect(0, 0, width, height);
-    const isMobile = window.innerWidth <= 768;
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
 
     particles.forEach((p) => {
       p.y += p.speedY;
@@ -510,7 +593,7 @@ function initLotusCanvas() {
 
       if (p.isPetal) {
         ctx.fillStyle = p.color;
-        ctx.globalAlpha = 0.52;
+        ctx.globalAlpha = isDark ? 0.78 : 0.52;
         for (let j = 0; j < 5; j++) {
           ctx.rotate((72 * Math.PI) / 180);
           ctx.beginPath();
@@ -521,11 +604,7 @@ function initLotusCanvas() {
         ctx.beginPath();
         ctx.arc(0, 0, p.radius, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
-        ctx.globalAlpha = p.alpha;
-        if (!isMobile && !currentTierBalanced) {
-          ctx.shadowBlur = 8;
-          ctx.shadowColor = p.color;
-        }
+        ctx.globalAlpha = isDark ? 0.85 : p.alpha;
         ctx.fill();
       }
       ctx.restore();
@@ -543,10 +622,6 @@ function initLotusCanvas() {
 function initFPSWatchdog() {
   // If already ultra-lite, no need to monitor
   if (document.documentElement.classList.contains('tier-ultra-lite')) return;
-
-  // Only run on mobile or touch-enabled devices
-  const isTouchOrMobile = window.innerWidth <= 992 || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
-  if (!isTouchOrMobile) return;
 
   function startWatchdog() {
     // If downgraded while waiting for start, exit
@@ -567,19 +642,33 @@ function initFPSWatchdog() {
         return;
       }
 
-      frameCount++;
+      // If document was hidden or window minimized, reset timer to avoid tab-switch false downgrade
+      if (document.hidden) {
+        startTime = now;
+        lastFrameTime = now;
+        watchdogRafId = requestAnimationFrame(checkFrame);
+        return;
+      }
+
       const delta = now - lastFrameTime;
       lastFrameTime = now;
 
-      if (delta > 80) {
+      // Single frame gap > 500ms indicates DevTools pause, tab switch, or window blur; ignore sample
+      if (delta > 500) {
+        watchdogRafId = requestAnimationFrame(checkFrame);
+        return;
+      }
+
+      frameCount++;
+      if (delta > 85) {
         slowFrames++;
       }
 
       const elapsed = now - startTime;
 
-      // Early downgrade trigger if multiple severe stutter frames detected (>= 3 frames > 80ms)
-      if (slowFrames >= 3) {
-        triggerDowngrade('Multiple heavy frame drops (>80ms) detected');
+      // Early downgrade trigger if sustained frame drops detected (>= 4 frames > 85ms across continuous active frames)
+      if (slowFrames >= 4) {
+        triggerDowngrade('Multiple heavy frame drops (>85ms) detected');
         return;
       }
 
@@ -588,21 +677,30 @@ function initFPSWatchdog() {
       } else {
         // 2.5 seconds completed, calculate average FPS
         const avgFPS = (frameCount * 1000) / elapsed;
-        if (avgFPS < 28) {
-          triggerDowngrade('Average FPS (' + avgFPS.toFixed(1) + ') below 28 FPS threshold');
+        if (avgFPS < 25) {
+          triggerDowngrade('Average FPS (' + avgFPS.toFixed(1) + ') below 25 FPS threshold');
         }
       }
     }
 
     function triggerDowngrade(reason) {
       if (document.documentElement.classList.contains('tier-ultra-lite')) return;
+
+      const isDesktop = window.matchMedia && window.matchMedia('(pointer: fine)').matches && window.innerWidth >= 1024;
+      // On capable Desktop, do not permanently write ultra-lite to localStorage from transient hiccups
+      if (isDesktop) {
+        console.warn('[NNM Perf Engine] Transient frame drops detected on Desktop; maintaining full visuals without downgrade.');
+        return;
+      }
+
       console.warn('[NNM Perf Engine] Auto-downgrading to tier-ultra-lite: ' + reason);
 
       document.documentElement.classList.remove('tier-balanced', 'tier-full');
       document.documentElement.classList.add('tier-ultra-lite');
+      document.documentElement.setAttribute('data-perf-tier', 'tier-ultra-lite');
 
       try {
-        sessionStorage.setItem('nnm_perf_tier', 'tier-ultra-lite');
+        localStorage.setItem('nnm_perf_tier_v3', 'tier-ultra-lite');
       } catch (e) {}
 
       // Stop canvas animation loop immediately
@@ -671,7 +769,7 @@ function initClassicalAudioPlayer() {
 
   if (!audio || !musicWidget) return;
 
-  // Smooth, soft and balanced ambient background volume for desktop and mobile
+  // Ultra-soft ambient volume ceiling (< 4%)
   const TARGET_VOLUME = 0.03;
   audio.volume = TARGET_VOLUME;
   audio.loop = true;
@@ -683,13 +781,42 @@ function initClassicalAudioPlayer() {
     }
   });
 
-  // Check persisted mute state (default to false = unmuted)
-  let isMuted = false;
-  try {
-    isMuted = localStorage.getItem('nnm_audio_muted') === 'true';
-  } catch(err) {}
+  // Persistent User Preference Engine (nnm_music_pref) - Default is strictly 'on'
+  function getMusicPref() {
+    try {
+      const pref = localStorage.getItem('nnm_music_pref');
+      if (pref === 'off' || pref === 'on') return pref;
+      const oldMuted = localStorage.getItem('nnm_audio_muted');
+      if (oldMuted === 'true') return 'off';
+    } catch(err) {}
+    return 'on'; // Default is ON across ALL devices
+  }
 
-  // One-time safe position restoration (Prevents loop seek-traps)
+  function setMusicPref(val) {
+    try {
+      localStorage.setItem('nnm_music_pref', val);
+      localStorage.setItem('nnm_audio_muted', val === 'off' ? 'true' : 'false');
+      localStorage.setItem('nnm_audio_playing', val === 'on' ? 'true' : 'false');
+      document.documentElement.setAttribute('data-music-pref', val);
+    } catch(err) {}
+  }
+
+  // Update Widget UI directly based on User Preference
+  function updateWidgetUI() {
+    const pref = getMusicPref();
+    document.documentElement.setAttribute('data-music-pref', pref);
+    if (pref === 'on') {
+      musicWidget.classList.add('playing');
+      musicWidget.setAttribute('aria-pressed', 'true');
+      if (musicStatusText) musicStatusText.innerHTML = '&#127925; Music: ON';
+    } else {
+      musicWidget.classList.remove('playing');
+      musicWidget.setAttribute('aria-pressed', 'false');
+      if (musicStatusText) musicStatusText.innerHTML = '&#128263; Music: OFF';
+    }
+  }
+
+  // One-time safe position restoration (prevents loop seek-traps)
   let hasRestoredInitialTime = false;
   function restorePlaybackTime() {
     if (hasRestoredInitialTime) return;
@@ -700,18 +827,15 @@ function initClassicalAudioPlayer() {
 
     if (!isNaN(savedTime) && savedTime > 0) {
       try {
-        // If track duration is available and saved time is within track and not at the very end
         if (!audio.duration || (savedTime < audio.duration - 2)) {
           audio.currentTime = savedTime;
           hasRestoredInitialTime = true;
         } else {
-          // If saved time was at or near the very end, reset to beginning cleanly
           audio.currentTime = 0;
           try { localStorage.setItem('nnm_audio_time', '0'); } catch(err) {}
           hasRestoredInitialTime = true;
         }
       } catch (e) {
-        // Audio stream might not be ready yet; let canplay/loadedmetadata retry ONCE
         return;
       }
     } else {
@@ -719,7 +843,6 @@ function initClassicalAudioPlayer() {
     }
   }
 
-  // Restore position on initial metadata/ready events ONCE
   restorePlaybackTime();
   const onInitialReady = () => {
     if (!hasRestoredInitialTime) restorePlaybackTime();
@@ -735,22 +858,16 @@ function initClassicalAudioPlayer() {
 
     // Detect loop wrap-around: if currentTime wrapped from near end (> 5s) back to beginning (< 2s)
     if (lastRecordedTime > 5 && cur < 2) {
-      try {
-        localStorage.setItem('nnm_audio_time', '0');
-      } catch(err) {}
+      try { localStorage.setItem('nnm_audio_time', '0'); } catch(err) {}
       lastRecordedTime = cur;
       return;
     }
 
     // If within 1.5 seconds of the end, save as 0 so the next cycle/session starts clean
     if (audio.duration && cur >= audio.duration - 1.5) {
-      try {
-        localStorage.setItem('nnm_audio_time', '0');
-      } catch(err) {}
+      try { localStorage.setItem('nnm_audio_time', '0'); } catch(err) {}
     } else if (cur >= 0) {
-      try {
-        localStorage.setItem('nnm_audio_time', cur.toString());
-      } catch(err) {}
+      try { localStorage.setItem('nnm_audio_time', cur.toString()); } catch(err) {}
     }
     lastRecordedTime = cur;
   }
@@ -767,17 +884,14 @@ function initClassicalAudioPlayer() {
   window.addEventListener('beforeunload', savePlaybackTime);
   window.addEventListener('pagehide', savePlaybackTime);
 
-  // Seamless Looping Engine:
-  // Native audio.loop = true handles continuous playback.
-  // The 'ended' event listener acts as a bulletproof failsafe if native loop doesn't restart in certain browsers:
+  // Seamless Looping Engine
   audio.addEventListener('ended', () => {
-    try {
-      localStorage.setItem('nnm_audio_time', '0');
-    } catch(err) {}
+    try { localStorage.setItem('nnm_audio_time', '0'); } catch(err) {}
     lastRecordedTime = 0;
     audio.currentTime = 0;
-    if (!isMuted) {
+    if (getMusicPref() === 'on') {
       audio.volume = TARGET_VOLUME;
+      audio.muted = false;
       const playPromise = audio.play();
       if (playPromise !== undefined) {
         playPromise.catch(() => {});
@@ -787,32 +901,66 @@ function initClassicalAudioPlayer() {
 
   // Safeguard: If audio pauses near the end instead of looping smoothly
   audio.addEventListener('pause', () => {
-    if (!isMuted && audio.duration && audio.currentTime >= audio.duration - 0.5) {
+    if (getMusicPref() === 'on' && audio.duration && audio.currentTime >= audio.duration - 0.5) {
       audio.currentTime = 0;
       try { localStorage.setItem('nnm_audio_time', '0'); } catch(err) {}
       audio.play().catch(() => {});
     }
   });
 
-  function updateWidgetUI() {
-    if (audio && !audio.paused && !audio.muted) {
-      musicWidget.classList.add('playing');
-      if (musicStatusText) musicStatusText.innerHTML = '&#127925; Music: ON';
+  // Global Gesture Fallback for Mobile Autoplay Restrictions
+  let gestureActive = false;
+  const gestureEvents = ['pointerdown', 'touchstart', 'click', 'keydown'];
+
+  function removeGestureListeners() {
+    if (!gestureActive) return;
+    gestureActive = false;
+    gestureEvents.forEach((evt) => {
+      window.removeEventListener(evt, onFirstGesture, true);
+      document.removeEventListener(evt, onFirstGesture, true);
+    });
+  }
+
+  function attachGestureFallback() {
+    if (getMusicPref() !== 'on') return;
+    if (gestureActive) return;
+    gestureActive = true;
+    gestureEvents.forEach((evt) => {
+      window.addEventListener(evt, onFirstGesture, { capture: true, passive: true });
+      document.addEventListener(evt, onFirstGesture, { capture: true, passive: true });
+    });
+  }
+
+  function onFirstGesture(e) {
+    // Prevent interfering if user directly clicked the music widget
+    if (e && e.target && e.target.closest && e.target.closest('#music-toggle-widget')) return;
+
+    if (getMusicPref() === 'on') {
+      if (!hasRestoredInitialTime) restorePlaybackTime();
+      audio.muted = false;
+      audio.volume = TARGET_VOLUME;
+      const p = audio.play();
+      if (p && typeof p.then === 'function') {
+        p.then(() => {
+          removeGestureListeners();
+        }).catch(() => {});
+      }
     } else {
-      musicWidget.classList.remove('playing');
-      if (musicStatusText) musicStatusText.innerHTML = '&#128263; Music: MUTED';
+      removeGestureListeners();
     }
   }
 
-  audio.addEventListener('play', updateWidgetUI);
-  audio.addEventListener('playing', updateWidgetUI);
-  audio.addEventListener('pause', updateWidgetUI);
-  audio.addEventListener('ended', updateWidgetUI);
-  audio.addEventListener('volumechange', updateWidgetUI);
+  // Once audio successfully starts playing, clean up gesture listeners
+  audio.addEventListener('playing', () => {
+    if (getMusicPref() === 'on') {
+      removeGestureListeners();
+    }
+  });
 
   function playAudio() {
-    if (isMuted) {
+    if (getMusicPref() !== 'on') {
       audio.pause();
+      audio.muted = true;
       updateWidgetUI();
       return;
     }
@@ -827,90 +975,50 @@ function initClassicalAudioPlayer() {
     if (playPromise !== undefined) {
       playPromise
         .then(() => {
-          isMuted = false;
-          try {
-            localStorage.setItem('nnm_audio_muted', 'false');
-            localStorage.setItem('nnm_audio_playing', 'true');
-          } catch(err) {}
-          updateWidgetUI();
+          removeGestureListeners();
         })
         .catch(() => {
-          updateWidgetUI();
-          attachAutoplayFallback();
+          // Autoplay blocked by mobile browser - UI stays ON, attach gesture fallback
+          attachGestureFallback();
         });
-    } else {
-      updateWidgetUI();
     }
   }
 
   function pauseAudio() {
     audio.pause();
     audio.muted = true;
-    isMuted = true;
-    try {
-      localStorage.setItem('nnm_audio_muted', 'true');
-      localStorage.setItem('nnm_audio_playing', 'false');
-    } catch(err) {}
+    removeGestureListeners();
     updateWidgetUI();
     savePlaybackTime();
   }
 
-  // ROBUST CROSS-BROWSER AUTO-PLAY UNLOCK STRATEGY
-  let autoplayUnlocked = false;
-  function attachAutoplayFallback() {
-    if (autoplayUnlocked) return;
-    const gestureEvents = ['pointerdown', 'touchstart', 'click', 'scroll', 'keydown', 'wheel', 'mousedown'];
-
-    const handleFirstGesture = (e) => {
-      // Prevent interfering if the user directly clicked the music widget
-      if (e && e.target && e.target.closest && e.target.closest('#music-toggle-widget')) return;
-
-      if (!isMuted && (audio.paused || audio.muted)) {
-        if (!hasRestoredInitialTime) {
-          restorePlaybackTime();
-        }
-        audio.volume = TARGET_VOLUME;
-        audio.muted = false;
-        const p = audio.play();
-        if (p && typeof p.then === 'function') {
-          p.then(() => {
-            updateWidgetUI();
-            try {
-              localStorage.setItem('nnm_audio_muted', 'false');
-              localStorage.setItem('nnm_audio_playing', 'true');
-            } catch(err) {}
-          }).catch(() => {});
-        }
-      }
-
-      autoplayUnlocked = true;
-      gestureEvents.forEach((evt) => {
-        window.removeEventListener(evt, handleFirstGesture, true);
-        document.removeEventListener(evt, handleFirstGesture, true);
-      });
-    };
-
-    gestureEvents.forEach((evt) => {
-      window.addEventListener(evt, handleFirstGesture, { capture: true, passive: true });
-      document.addEventListener(evt, handleFirstGesture, { capture: true, passive: true });
-    });
+  // Initial playback boot
+  updateWidgetUI();
+  if (getMusicPref() === 'on') {
+    playAudio();
   }
 
-  // Initial playback state
-  updateWidgetUI();
-  playAudio();
-  attachAutoplayFallback();
-
   // Floating widget toggle listener
-  musicWidget.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (audio.paused || audio.muted || !musicWidget.classList.contains('playing')) {
-      isMuted = false;
-      try { localStorage.setItem('nnm_audio_muted', 'false'); } catch(err) {}
-      playAudio();
-    } else {
-      isMuted = true;
+  function toggleMusic(e) {
+    if (e) {
+      e.stopPropagation();
+      if (e.preventDefault) e.preventDefault();
+    }
+    if (getMusicPref() === 'on') {
+      setMusicPref('off');
       pauseAudio();
+    } else {
+      setMusicPref('on');
+      updateWidgetUI();
+      playAudio();
+    }
+  }
+
+  musicWidget.addEventListener('click', toggleMusic);
+  musicWidget.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleMusic(e);
     }
   });
 }
@@ -1930,36 +2038,76 @@ function initModalsAndGallery() {
     }
   });
 
-  // LIGHTNING-FAST LIGHTBOX CONTROLLER
+  // LIGHTNING-FAST LIGHTBOX CONTROLLER (WITH PREV/NEXT SERIAL NAVIGATION)
   const lightboxModal = document.getElementById('lightbox-modal');
   const lightboxImg = document.getElementById('lightbox-img');
   const lightboxTitle = document.getElementById('lightbox-title');
   const lightboxYear = document.getElementById('lightbox-year');
+  const lightboxCounter = document.getElementById('lightbox-counter');
   const lightboxCloseBtn = document.getElementById('lightboxCloseBtn');
+  const lightboxPrevBtn = document.getElementById('lightboxPrevBtn');
+  const lightboxNextBtn = document.getElementById('lightboxNextBtn');
 
-  function openGalleryLightbox(thumbSrc, title, year, fullSrc) {
-    if (!lightboxModal || !lightboxImg) return;
-    
+  let galleryCards = [];
+  let currentGalleryIndex = 0;
+
+  function refreshGalleryCards() {
+    const grid = document.querySelector('.performance-gallery-grid');
+    if (grid) {
+      galleryCards = Array.from(grid.querySelectorAll('.gallery-photo-card'));
+    }
+  }
+  refreshGalleryCards();
+
+  function showGalleryItem(index) {
+    if (!galleryCards.length) refreshGalleryCards();
+    if (!galleryCards.length || !lightboxModal || !lightboxImg) return;
+
+    // Strict circular wrap-around (36 -> 1, 1 -> 36)
+    currentGalleryIndex = (index + galleryCards.length) % galleryCards.length;
+    const card = galleryCards[currentGalleryIndex];
+    if (!card) return;
+
+    const thumbSrc = card.getAttribute('data-img') || '';
+    const fullSrc = card.getAttribute('data-full') || thumbSrc;
+    const title = card.getAttribute('data-title') || 'Stage Performance';
+    const year = card.getAttribute('data-year') || '2026';
+
     // 1. Show thumbnail immediately (0ms instant display from memory)
-    lightboxImg.src = thumbSrc || '';
-    if (lightboxTitle) lightboxTitle.innerText = title || 'Stage Performance';
-    if (lightboxYear) lightboxYear.innerText = year || '2026';
-    
-    lightboxModal.classList.add('active');
-    document.body.style.overflow = 'hidden';
+    lightboxImg.src = thumbSrc;
+    if (lightboxTitle) lightboxTitle.innerText = title;
+    if (lightboxYear) lightboxYear.innerText = year;
+    if (lightboxCounter) lightboxCounter.innerText = (currentGalleryIndex + 1) + ' / ' + galleryCards.length;
 
     // 2. Preload full-resolution image seamlessly without blocking UI
-    const targetFull = fullSrc || thumbSrc;
-    if (targetFull && targetFull !== thumbSrc) {
+    if (fullSrc && fullSrc !== thumbSrc) {
       const fullImg = new Image();
       fullImg.onload = () => {
-        // Swap to crisp full-res image once loaded
-        if (lightboxModal.classList.contains('active')) {
-          lightboxImg.src = targetFull;
+        // Only swap if user hasn't moved to another photo while loading
+        if (lightboxModal.classList.contains('active') && galleryCards[currentGalleryIndex] === card) {
+          lightboxImg.src = fullSrc;
         }
       };
-      fullImg.src = targetFull;
+      fullImg.src = fullSrc;
     }
+  }
+
+  function openGalleryLightboxByIndex(index) {
+    showGalleryItem(index);
+    if (!lightboxModal) return;
+    lightboxModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function openGalleryLightbox(thumbSrc, title, year, fullSrc) {
+    if (!galleryCards.length) refreshGalleryCards();
+    // Locate card by matching fullSrc or thumbSrc
+    const matchIdx = galleryCards.findIndex((c) => {
+      const cFull = c.getAttribute('data-full');
+      const cThumb = c.getAttribute('data-img');
+      return (fullSrc && cFull === fullSrc) || (thumbSrc && cThumb === thumbSrc);
+    });
+    openGalleryLightboxByIndex(matchIdx >= 0 ? matchIdx : 0);
   }
 
   function closeGalleryLightbox() {
@@ -1978,6 +2126,42 @@ function initModalsAndGallery() {
     lightboxCloseBtn.addEventListener('touchend', handleClose);
   }
 
+  // Prev / Next Button Listeners with stopPropagation safeguard
+  if (lightboxPrevBtn) {
+    const handlePrev = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      showGalleryItem(currentGalleryIndex - 1);
+    };
+    lightboxPrevBtn.addEventListener('click', handlePrev);
+    lightboxPrevBtn.addEventListener('touchend', handlePrev);
+  }
+
+  if (lightboxNextBtn) {
+    const handleNext = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      showGalleryItem(currentGalleryIndex + 1);
+    };
+    lightboxNextBtn.addEventListener('click', handleNext);
+    lightboxNextBtn.addEventListener('touchend', handleNext);
+  }
+
+  // Keyboard navigation listener (ArrowLeft, ArrowRight, Escape)
+  window.addEventListener('keydown', (e) => {
+    if (!lightboxModal || !lightboxModal.classList.contains('active')) return;
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      showGalleryItem(currentGalleryIndex - 1);
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      showGalleryItem(currentGalleryIndex + 1);
+    } else if (e.key === 'Escape' || e.key === 'Esc') {
+      e.preventDefault();
+      closeGalleryLightbox();
+    }
+  });
+
   if (lightboxModal) {
     lightboxModal.addEventListener('click', (e) => {
       if (e.target === lightboxModal || e.target.classList.contains('gallery-lightbox-container')) {
@@ -1985,17 +2169,32 @@ function initModalsAndGallery() {
       }
     });
 
+    // Touch Swipe Navigation with Horizontal Dominance Check
     let touchStartY = 0;
     let touchStartX = 0;
     lightboxModal.addEventListener('touchstart', (e) => {
-      touchStartY = e.touches[0].clientY;
-      touchStartX = e.touches[0].clientX;
+      if (e.touches && e.touches[0]) {
+        touchStartY = e.touches[0].clientY;
+        touchStartX = e.touches[0].clientX;
+      }
     }, { passive: true });
 
     lightboxModal.addEventListener('touchend', (e) => {
-      const diffY = e.changedTouches[0].clientY - touchStartY;
-      const diffX = e.changedTouches[0].clientX - touchStartX;
-      if (diffY > 60 && Math.abs(diffX) < 80) {
+      if (!e.changedTouches || !e.changedTouches[0]) return;
+      const deltaY = e.changedTouches[0].clientY - touchStartY;
+      const deltaX = e.changedTouches[0].clientX - touchStartX;
+
+      // Horizontal swipe dominance check
+      if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY)) {
+        if (deltaX < 0) {
+          // Swipe Left -> Next Photo
+          showGalleryItem(currentGalleryIndex + 1);
+        } else {
+          // Swipe Right -> Previous Photo
+          showGalleryItem(currentGalleryIndex - 1);
+        }
+      } else if (deltaY > 80 && Math.abs(deltaX) < 60) {
+        // Pull down -> Close Lightbox
         closeGalleryLightbox();
       }
       touchStartY = 0;
@@ -2648,8 +2847,10 @@ function initScrollReveal() {
     '.form-glass-card',
     '.summary-card',
     '.contact-grid > div',
-    '.footer-grid > div',
-    '.reveal-on-scroll'
+    '.reveal-on-scroll',
+    '.scroll-reveal',
+    '.reveal-item',
+    '.stagger-item'
   ];
 
   const elements = document.querySelectorAll(targetSelectors.join(', '));
@@ -2672,15 +2873,14 @@ function initScrollReveal() {
 
   const observerOptions = {
     root: null,
-    rootMargin: '0px 0px -30px 0px',
-    threshold: 0.08
+    rootMargin: '0px 0px 60px 0px',
+    threshold: 0.01
   };
 
   const observer = new IntersectionObserver((entries, obs) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
         entry.target.classList.add('revealed', 'is-visible');
-        // STRICT ONCE UX RULE: unobserve immediately so it stays revealed forever
         obs.unobserve(entry.target);
       }
     });
@@ -2688,26 +2888,77 @@ function initScrollReveal() {
 
   window.scrollRevealObserver = observer;
 
-  elements.forEach((el) => {
-    if (!el.classList.contains('revealed')) {
-      observer.observe(el);
-    }
-  });
-
-  // SPA View Switch Synchronization: Reveal elements already inside the new visible viewport
+  // SPA View Switch Synchronization & Per-Visit Reveal
   window.refreshScrollReveal = function () {
-    const activeView = document.querySelector('.page-view.active') || document.body;
-    const pending = activeView.querySelectorAll('.scroll-reveal:not(.revealed)');
+    const activeViews = document.querySelectorAll('.page-view.active');
+    const containers = activeViews.length ? activeViews : [document.body];
+
+    if (!('IntersectionObserver' in window) || document.documentElement.classList.contains('tier-ultra-lite')) {
+      containers.forEach((view) => {
+        view.querySelectorAll(targetSelectors.join(', ')).forEach((el) => {
+          el.classList.add('revealed', 'is-visible');
+        });
+      });
+      return;
+    }
+
     const vh = window.innerHeight || document.documentElement.clientHeight;
-    pending.forEach((el) => {
-      const rect = el.getBoundingClientRect();
-      if (rect.top < vh && rect.bottom > 0) {
-        el.classList.add('revealed', 'is-visible');
-        observer.unobserve(el);
-      } else {
-        observer.observe(el);
-      }
+
+    containers.forEach((view) => {
+      const targets = view.querySelectorAll(targetSelectors.join(', '));
+      targets.forEach((el) => {
+        if (!el.classList.contains('scroll-reveal')) {
+          el.classList.add('scroll-reveal');
+        }
+
+        const rect = el.getBoundingClientRect();
+        // If element is already above the fold or in/near viewport at scrollY === 0, reveal immediately
+        if (rect.top < vh + 60 && rect.bottom > -50) {
+          el.classList.add('revealed', 'is-visible');
+          observer.unobserve(el);
+        } else if (!el.classList.contains('revealed')) {
+          observer.observe(el);
+        }
+      });
     });
   };
+
+  // Safeguard 1: Single RAF-throttled scroll failsafe listener for zero-blank-page guarantee
+  let scrollFailsafeTicking = false;
+  function runScrollFailsafe() {
+    if (document.documentElement.classList.contains('tier-ultra-lite')) return;
+    const activeViews = document.querySelectorAll('.page-view.active');
+    if (!activeViews.length) return;
+    const vh = window.innerHeight || document.documentElement.clientHeight;
+    activeViews.forEach((view) => {
+      const unrevealed = view.querySelectorAll('.scroll-reveal:not(.revealed), .reveal-item:not(.revealed), .stagger-item:not(.revealed)');
+      unrevealed.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < vh + 80 && rect.bottom > -50) {
+          el.classList.add('revealed', 'is-visible');
+          if (window.scrollRevealObserver) {
+            window.scrollRevealObserver.unobserve(el);
+          }
+        }
+      });
+    });
+  }
+  window.runScrollRevealFailsafe = runScrollFailsafe;
+
+  if (!window._scrollRevealFailsafeAttached) {
+    window.addEventListener('scroll', () => {
+      if (!scrollFailsafeTicking) {
+        scrollFailsafeTicking = true;
+        requestAnimationFrame(() => {
+          runScrollFailsafe();
+          scrollFailsafeTicking = false;
+        });
+      }
+    }, { passive: true });
+    window._scrollRevealFailsafeAttached = true;
+  }
+
+  // Initial trigger for current visible view
+  window.refreshScrollReveal();
 }
 
