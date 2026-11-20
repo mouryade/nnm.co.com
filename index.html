@@ -72,17 +72,18 @@
         }
       } catch (routeErr) {}
 
-      // 3. Hardware-First Persistent 3-Tier Detection (v3 Engine - Rescues Poisoned Desktop Locks)
+      // 3. Hardware-First Persistent 3-Tier Detection (v4 Engine - Rescues Poisoned Devices)
       try {
-        // Clean up legacy v1 and v2 tier keys so poisoned devices are freed immediately
+        // Clean up legacy v1, v2, and v3 tier keys so poisoned devices are freed immediately
         try {
           localStorage.removeItem('nnm_perf_tier');
           localStorage.removeItem('nnm_perf_tier_v2');
+          localStorage.removeItem('nnm_perf_tier_v3');
         } catch (cleanErr) {}
 
         var cached = null;
         try {
-          cached = localStorage.getItem('nnm_perf_tier_v3');
+          cached = localStorage.getItem('nnm_perf_tier_v4');
         } catch (storageErr) {}
 
         if (cached === 'tier-ultra-lite') {
@@ -135,7 +136,7 @@
           try {
             // Avoid permanently writing ultra-lite during Desktop DevTools mobile emulation
             if (!isCapableDesktop && sw < 1024) {
-              localStorage.setItem('nnm_perf_tier_v3', 'tier-ultra-lite');
+              localStorage.setItem('nnm_perf_tier_v4', 'tier-ultra-lite');
             }
           } catch (e) {}
         } else if (prefersReducedMotion || isDataSaver || noIO) {
@@ -162,6 +163,7 @@
 
   <!-- HTML5 Background Audio Element (Rabindra Sangeet) -->
   <audio id="bg-classical-audio" src="assets/Rabindra_Sangeet.mp3" loop preload="none"></audio>
+  <script>window.addEventListener('load',function(){setTimeout(function(){var a=document.getElementById('bg-classical-audio');if(a&&a.preload==='none')a.preload='metadata';},1500);});</script>
 
   <!-- Radiant Mesh & Full-Screen Falling Lotus Petals Canvas Background -->
   <canvas id="cosmic-canvas"></canvas>
@@ -176,9 +178,8 @@
     </div>
     <span class="music-label" id="music-status-text">&#127925; Music: ON</span>
   </div>
-  <script>(function(){if(document.documentElement.getAttribute('data-music-pref')==='off'){var el=document.getElementById('music-status-text'),w=document.getElementById('music-toggle-widget');if(el)el.innerHTML='&#128263; Music: OFF';if(w){w.classList.remove('playing');w.setAttribute('aria-pressed','false');}}})();</script>
+  <script>(function(){var pref='on';try{pref=localStorage.getItem('nnm_music_pref')||'on';var oldMuted=localStorage.getItem('nnm_audio_muted');if(oldMuted==='true'&&!localStorage.getItem('nnm_music_pref'))pref='off';}catch(e){}var el=document.getElementById('music-status-text'),w=document.getElementById('music-toggle-widget');if(pref==='off'){if(el)el.innerHTML='&#128263; Music: OFF';if(w){w.classList.remove('playing','music-waiting-tap');w.setAttribute('aria-pressed','false');}}else{var isMobile=(window.matchMedia&&window.matchMedia('(pointer: coarse)').matches)||(((window.screen&&window.screen.width)?window.screen.width:window.innerWidth)<=992);if(isMobile){if(el)el.innerHTML='&#127925; Tap for Music';if(w){w.classList.add('music-waiting-tap');w.classList.remove('playing');w.setAttribute('aria-pressed','false');}}else{if(el)el.innerHTML='&#127925; Music: ON';if(w){w.classList.add('playing');w.classList.remove('music-waiting-tap');w.setAttribute('aria-pressed','true');}}}})();</script>
 
-  <!-- ==========================================================================
   <!-- ==========================================================================
         REBUILT TOP NAVIGATION BAR (GLASSMORPHISM & FAIL-SAFE MOBILE DRAWER)
         ========================================================================== -->
@@ -1528,7 +1529,7 @@
           <p style="color: var(--text-sub); font-size: 0.9rem; margin-bottom: 1.2rem;">Follow our performance videos & updates.</p>
           <div class="social-links">
             <a href="https://www.facebook.com/share/1C4DQH4fAD/" target="_blank" rel="noopener noreferrer" class="social-icon social-icon-facebook" title="Official Facebook Page"><i class="fa-brands fa-facebook-f"></i></a>
-            <a href="https://www.instagram.com/nnm_how?igsh=MWNjeWZpN3RxM296Zg==" target="_blank" rel="noopener noreferrer" class="social-icon social-icon-instagram" title="Official Instagram Account"><i class="fa-brands fa-instagram"></i></a>
+            <a href="https://www.instagram.com/nataraj_nritya_mandir?jplx=MXV6ZDJpOGh0dWhkbQ==" target="_blank" rel="noopener noreferrer" class="social-icon social-icon-instagram" title="Official Instagram Account" aria-label="Follow Nataraj Nritya Mandir on Instagram"><i class="fa-brands fa-instagram"></i></a>
             <a href="https://youtube.com/@nataraj_nritya_mandir?si=suz6ItybwxdHF1cG" target="_blank" rel="noopener noreferrer" class="social-icon social-icon-youtube" title="Official YouTube Channel"><i class="fa-brands fa-youtube"></i></a>
           </div>
         </div>
