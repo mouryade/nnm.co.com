@@ -2409,7 +2409,7 @@ body.drawer-body-lock {
   box-sizing: border-box;
   opacity: 0;
   pointer-events: none !important;
-  transition: opacity 0.2s ease-out;
+  transition: opacity 0.18s ease-out;
   will-change: opacity;
   touch-action: manipulation;
   overflow: hidden;
@@ -2441,7 +2441,7 @@ body.drawer-body-lock {
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
               background 0.2s ease,
               border-color 0.2s ease !important;
-  z-index: 9999999 !important;
+  z-index: 10000000 !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 255, 255, 0.3) !important;
   touch-action: manipulation;
   pointer-events: auto !important;
@@ -2476,7 +2476,7 @@ body.drawer-body-lock {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 9999999 !important;
+  z-index: 10000000 !important;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7), 0 0 15px rgba(212, 175, 55, 0.25);
@@ -2488,6 +2488,7 @@ body.drawer-body-lock {
   -webkit-tap-highlight-color: transparent;
   outline: none;
   padding: 0;
+  pointer-events: auto !important;
 }
 
 .gallery-lightbox-nav:hover,
@@ -2515,7 +2516,7 @@ body.drawer-body-lock {
   position: fixed !important;
   top: max(20px, env(safe-area-inset-top, 20px)) !important;
   left: max(20px, env(safe-area-inset-left, 20px)) !important;
-  z-index: 9999999 !important;
+  z-index: 10000000 !important;
   display: flex !important;
   align-items: center !important;
   pointer-events: auto !important;
@@ -2554,8 +2555,6 @@ html.tier-ultra-lite .gallery-lightbox-nav {
 
 .gallery-lightbox-container {
   position: relative;
-  max-width: 90vw !important;
-  max-height: 90vh !important;
   width: auto;
   height: auto;
   display: flex !important;
@@ -2565,56 +2564,64 @@ html.tier-ultra-lite .gallery-lightbox-nav {
   margin: auto !important;
   pointer-events: auto;
   box-sizing: border-box;
-  opacity: 0;
-  transform: scale(0.96) translate3d(0, 0, 0);
-  transition: opacity 0.2s ease-out, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: transform, opacity;
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
   min-height: 0 !important;
   min-width: 0 !important;
+  z-index: 100;
 }
 
 .gallery-lightbox-backdrop.active .gallery-lightbox-container {
   opacity: 1 !important;
-  transform: scale(1) translate3d(0, 0, 0);
+  transform: none !important;
 }
 
+.gallery-lightbox-stage,
 .gallery-lightbox-media {
   position: relative;
-  max-width: 90vw !important;
-  max-height: calc(88vh - 65px) !important;
+  width: min(86vw, 960px) !important;
+  height: min(72vh, 600px) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 25px rgba(212, 175, 55, 0.25);
-  border: 1.5px solid rgba(212, 175, 55, 0.4);
-  background: #000000;
-  flex: 0 1 auto;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  box-sizing: border-box;
+  flex-shrink: 0 !important;
   min-height: 0 !important;
   min-width: 0 !important;
-  box-sizing: border-box;
 }
 
+.gallery-lightbox-stage img,
 .gallery-lightbox-media img,
 #lightbox-img {
-  max-width: 90vw !important;
-  max-height: calc(88vh - 65px) !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
   width: auto !important;
   height: auto !important;
   object-fit: contain !important;
   display: block !important;
-  margin: 0 auto !important;
-  flex-shrink: 1 !important;
-  border-radius: inherit;
-  transform: translate3d(0, 0, 0);
+  margin: auto !important;
+  border-radius: 12px;
+  border: 1.5px solid rgba(212, 175, 55, 0.45);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 25px rgba(212, 175, 55, 0.25);
+  transform: none !important;
+  transition: opacity 0.12s ease;
   will-change: opacity;
+}
+
+html.tier-ultra-lite #lightbox-img {
+  transition: none !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5) !important;
 }
 
 .gallery-lightbox-info {
   margin-top: 0.75rem;
-  width: 100%;
-  max-width: 90vw;
+  width: min(86vw, 960px) !important;
+  max-width: 100% !important;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -2683,18 +2690,23 @@ html.tier-ultra-lite .gallery-lightbox-nav {
     font-size: 1.25rem !important;
   }
   .gallery-lightbox-container {
-    max-width: 94vw !important;
-    max-height: 92vh !important;
+    width: auto !important;
+    max-width: 96vw !important;
   }
+  .gallery-lightbox-stage,
   .gallery-lightbox-media {
-    max-width: 94vw !important;
-    max-height: calc(92vh - 46px) !important;
+    width: 92vw !important;
+    height: 58vh !important;
   }
+  .gallery-lightbox-stage img,
   .gallery-lightbox-media img,
   #lightbox-img {
-    max-width: 94vw !important;
-    max-height: calc(92vh - 46px) !important;
-    object-fit: contain !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+  }
+  .gallery-lightbox-info {
+    width: 92vw !important;
+    margin-top: 0.5rem;
   }
   .gallery-lightbox-title {
     font-size: 1.05rem;
@@ -2756,19 +2768,24 @@ html.tier-ultra-lite .gallery-lightbox-nav {
     font-size: 1.1rem !important;
   }
   .gallery-lightbox-container {
-    max-width: 96vw !important;
-    max-height: 94vh !important;
+    width: auto !important;
+    max-width: 98vw !important;
   }
+  .gallery-lightbox-stage,
   .gallery-lightbox-media {
-    max-width: 96vw !important;
-    max-height: calc(94vh - 38px) !important;
+    width: 94vw !important;
+    height: 50vh !important;
     border-radius: 8px;
   }
+  .gallery-lightbox-stage img,
   .gallery-lightbox-media img,
   #lightbox-img {
-    max-width: 96vw !important;
-    max-height: calc(94vh - 38px) !important;
-    object-fit: contain !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+  }
+  .gallery-lightbox-info {
+    width: 94vw !important;
+    margin-top: 0.35rem;
   }
   .gallery-lightbox-title {
     font-size: 0.95rem;
