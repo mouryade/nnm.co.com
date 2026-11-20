@@ -2053,7 +2053,7 @@ function initModalsAndGallery() {
     }
   });
 
-  // LIGHTNING-FAST LIGHTBOX CONTROLLER (WITH PREV/NEXT SERIAL NAVIGATION)
+  // LIGHTNING-FAST LIGHTBOX CONTROLLER (ATOMIC PRE-DECODE SWAP & STABLE STAGE)
   const lightboxModal = document.getElementById('lightbox-modal');
   const lightboxImg = document.getElementById('lightbox-img');
   const lightboxTitle = document.getElementById('lightbox-title');
@@ -2065,6 +2065,7 @@ function initModalsAndGallery() {
 
   let galleryCards = [];
   let currentGalleryIndex = 0;
+  let lightboxReqId = 0;
 
   function refreshGalleryCards() {
     const grid = document.querySelector('.performance-gallery-grid');
@@ -2074,7 +2075,24 @@ function initModalsAndGallery() {
   }
   refreshGalleryCards();
 
-  function showGalleryItem(index) {
+  // Smart Neighbor Preloading (-2, -1, +1, +2 with wrap-around)
+  function preloadNeighbors(centerIndex) {
+    if (!galleryCards.length) return;
+    const offsets = [1, -1, 2, -2];
+    offsets.forEach((offset) => {
+      const nIdx = (centerIndex + offset + galleryCards.length) % galleryCards.length;
+      const nCard = galleryCards[nIdx];
+      if (nCard) {
+        const nSrc = nCard.getAttribute('data-full') || nCard.getAttribute('data-img');
+        if (nSrc) {
+          const pre = new Image();
+          pre.src = nSrc;
+        }
+      }
+    });
+  }
+
+  function showGalleryItem(index, isFreshOpen) {
     if (!galleryCards.length) refreshGalleryCards();
     if (!galleryCards.length || !lightboxModal || !lightboxImg) return;
 
@@ -2083,40 +2101,57 @@ function initModalsAndGallery() {
     const card = galleryCards[currentGalleryIndex];
     if (!card) return;
 
-    const thumbSrc = card.getAttribute('data-img') || '';
-    const fullSrc = card.getAttribute('data-full') || thumbSrc;
+    const reqId = ++lightboxReqId;
+    const targetSrc = card.getAttribute('data-full') || card.getAttribute('data-img') || '';
     const title = card.getAttribute('data-title') || 'Stage Performance';
     const year = card.getAttribute('data-year') || '2026';
 
-    // 1. Show thumbnail immediately (0ms instant display from memory)
-    lightboxImg.src = thumbSrc;
-    if (lightboxTitle) lightboxTitle.innerText = title;
-    if (lightboxYear) lightboxYear.innerText = year;
-    if (lightboxCounter) lightboxCounter.innerText = (currentGalleryIndex + 1) + ' / ' + galleryCards.length;
+    // Instant counter feedback (0ms)
+    if (lightboxCounter) {
+      lightboxCounter.innerText = (currentGalleryIndex + 1) + ' / ' + galleryCards.length;
+    }
 
-    // 2. Preload full-resolution image seamlessly without blocking UI
-    if (fullSrc && fullSrc !== thumbSrc) {
-      const fullImg = new Image();
-      fullImg.onload = () => {
-        // Only swap if user hasn't moved to another photo while loading
-        if (lightboxModal.classList.contains('active') && galleryCards[currentGalleryIndex] === card) {
-          lightboxImg.src = fullSrc;
-        }
-      };
-      fullImg.src = fullSrc;
+    // Refinement 2: Prevent Stale Previous Photo Flash on Fresh Open
+    if (isFreshOpen) {
+      lightboxImg.style.opacity = '0';
+    }
+
+    const commitSwap = () => {
+      if (reqId !== lightboxReqId) return; // Stale click race protection
+      lightboxImg.src = targetSrc;
+      lightboxImg.alt = title;
+      if (lightboxTitle) lightboxTitle.innerText = title;
+      if (lightboxYear) lightboxYear.innerText = year;
+      lightboxImg.style.opacity = '1';
+      // Preload adjacent neighbors in the background
+      preloadNeighbors(currentGalleryIndex);
+    };
+
+    // Pre-decode target image BEFORE touching visible image & caption
+    const loader = new Image();
+    loader.src = targetSrc;
+
+    if (loader.complete && loader.naturalWidth > 0) {
+      commitSwap();
+    } else if (typeof loader.decode === 'function') {
+      loader.decode().then(commitSwap).catch(() => {
+        if (loader.complete) commitSwap();
+        else loader.onload = commitSwap;
+      });
+    } else {
+      loader.onload = commitSwap;
     }
   }
 
   function openGalleryLightboxByIndex(index) {
-    showGalleryItem(index);
     if (!lightboxModal) return;
+    showGalleryItem(index, true); // true = fresh open
     lightboxModal.classList.add('active');
     document.body.style.overflow = 'hidden';
   }
 
   function openGalleryLightbox(thumbSrc, title, year, fullSrc) {
     if (!galleryCards.length) refreshGalleryCards();
-    // Locate card by matching fullSrc or thumbSrc
     const matchIdx = galleryCards.findIndex((c) => {
       const cFull = c.getAttribute('data-full');
       const cThumb = c.getAttribute('data-img');
@@ -2129,6 +2164,12 @@ function initModalsAndGallery() {
     if (!lightboxModal) return;
     lightboxModal.classList.remove('active');
     document.body.style.overflow = '';
+    // Invalidate any in-flight decode swaps and clear stale visible image
+    lightboxReqId++;
+    if (lightboxImg) {
+      lightboxImg.style.opacity = '0';
+      lightboxImg.src = '';
+    }
   }
 
   if (lightboxCloseBtn) {
@@ -2238,11 +2279,17 @@ function initModalsAndGallery() {
   if (galleryGrid) {
     function triggerCardOpen(card) {
       if (!card) return;
-      const thumbSrc = card.getAttribute('data-img');
-      const fullSrc = card.getAttribute('data-full') || thumbSrc;
-      const title = card.getAttribute('data-title');
-      const year = card.getAttribute('data-year');
-      openGalleryLightbox(thumbSrc, title, year, fullSrc);
+      if (!galleryCards.length) refreshGalleryCards();
+      const idx = galleryCards.indexOf(card);
+      if (idx >= 0) {
+        openGalleryLightboxByIndex(idx);
+      } else {
+        const thumbSrc = card.getAttribute('data-img');
+        const fullSrc = card.getAttribute('data-full') || thumbSrc;
+        const title = card.getAttribute('data-title');
+        const year = card.getAttribute('data-year');
+        openGalleryLightbox(thumbSrc, title, year, fullSrc);
+      }
     }
 
     let touchStartX = 0;
