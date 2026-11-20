@@ -89,6 +89,32 @@
   --modal-bg: #0B0826;
 }
 
+/* Zero White-Theme Flash (FOUC) Instant Pre-Paint Baseline & Transition Lock */
+html.no-theme-transition,
+html.no-theme-transition *,
+html.no-theme-transition *::before,
+html.no-theme-transition *::after {
+  transition: none !important;
+}
+
+html {
+  background-color: var(--bg-deep);
+}
+
+html[data-theme="dark"] {
+  background-color: var(--bg-deep) !important;
+  color: var(--text-main) !important;
+}
+
+html[data-theme="dark"] body,
+html[data-theme="dark"] main,
+html[data-theme="dark"] #main-content,
+html[data-theme="dark"] .page-view {
+  background-color: transparent !important;
+  background: transparent !important;
+  color: var(--text-main) !important;
+}
+
 /* --------------------------------------------------------------------------
    2. RESET & BASE STYLES
    -------------------------------------------------------------------------- */
@@ -138,7 +164,7 @@ a, button, input, select, textarea, .course-card, .gallery-photo-card, .style-op
 }
 
 body {
-  background-color: var(--bg-deep);
+  background-color: transparent;
   color: var(--text-main);
   font-family: var(--font-modern);
   line-height: 1.65;
@@ -159,19 +185,27 @@ body[data-theme="light"]::before {
     radial-gradient(circle at 50% 80%, rgba(0, 188, 212, 0.12), transparent 40%),
     radial-gradient(circle at 80% 85%, rgba(142, 36, 170, 0.12), transparent 45%);
   pointer-events: none;
-  z-index: -3;
+  z-index: 0;
 }
 
-/* Full-Screen Falling Lotus Canvas Engine Background */
+/* Full-Screen Falling Lotus Canvas Engine Background (Z-Index 0: In front of base html, behind main content) */
 #cosmic-canvas {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  z-index: -2;
+  z-index: 0;
   pointer-events: none;
   contain: layout style paint;
+}
+
+/* Content layer sits above background canvas */
+#main-content,
+.page-view,
+footer {
+  position: relative;
+  z-index: 1;
 }
 
 /* Cursor Glow Follower */
@@ -211,6 +245,22 @@ body[data-theme="light"]::before {
   transform: translateY(16px);
   min-height: auto;
   padding-bottom: 0;
+}
+
+/* Zero #home Route Flash on Reload (Pre-Paint Instant Display) */
+html[data-init-route] .page-view[data-page-view="home"] {
+  display: none !important;
+}
+
+html[data-init-route="about"] .page-view[data-page-view="about"],
+html[data-init-route="courses"] .page-view[data-page-view="courses"],
+html[data-init-route="gallery"] .page-view[data-page-view="gallery"],
+html[data-init-route="testimonials"] .page-view[data-page-view="testimonials"],
+html[data-init-route="form"] .page-view[data-page-view="form"],
+html[data-init-route="contact"] .page-view[data-page-view="contact"] {
+  display: block !important;
+  opacity: 1 !important;
+  transform: none !important;
 }
 
 .page-view.active {
@@ -393,22 +443,13 @@ body[data-theme="light"]::before {
   transition: var(--transition-smooth);
 }
 
-.music-controller-widget {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0.8rem 1.4rem;
-  background: var(--bg-surface-glass);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid var(--glass-border);
-  border-radius: 50px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-  cursor: pointer;
+html:not([data-theme="dark"]) .site-header {
+  background: var(--glass-bg);
+}
+
+html[data-theme="dark"] .site-header {
+  background: rgba(10, 8, 28, 0.85);
+  border-bottom: 1.5px solid rgba(255, 215, 0, 0.35);
 }
 
 .site-header.scrolled {
@@ -672,7 +713,7 @@ body[data-theme="light"]::before {
   will-change: transform;
 }
 
-[data-theme="light"] .mobile-drawer-content {
+html:not([data-theme="dark"]) .mobile-drawer-content {
   background: linear-gradient(165deg, #FFFFFF 0%, #FAF7F2 100%);
   box-shadow: -15px 0 45px rgba(0, 0, 0, 0.25);
 }
@@ -922,7 +963,7 @@ body.drawer-body-lock {
     outline: none;
   }
 
-  [data-theme="light"] .mobile-drawer-content {
+  html:not([data-theme="dark"]) .mobile-drawer-content {
     background: linear-gradient(
       145deg,
       rgba(255, 255, 255, 0.78) 0%,
@@ -995,7 +1036,7 @@ body.drawer-body-lock {
     transform-style: preserve-3d;
   }
 
-  [data-theme="light"] .mobile-drawer-link {
+  html:not([data-theme="dark"]) .mobile-drawer-link {
     background: rgba(212, 175, 55, 0.08) !important;
     border-color: rgba(212, 175, 55, 0.3) !important;
     box-shadow:
@@ -2418,6 +2459,99 @@ body.drawer-body-lock {
   box-shadow: 0 0 25px rgba(233, 30, 99, 0.9) !important;
 }
 
+/* Lightbox Prev & Next Navigation Buttons */
+.gallery-lightbox-nav {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(14, 12, 27, 0.75);
+  border: 1.5px solid var(--neon-gold, #D4AF37);
+  color: #FFFFFF;
+  font-size: 2.4rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 9999999 !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7), 0 0 15px rgba(212, 175, 55, 0.25);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              background 0.2s ease,
+              border-color 0.2s ease,
+              box-shadow 0.2s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  padding: 0;
+}
+
+.gallery-lightbox-nav:hover,
+.gallery-lightbox-nav:focus-visible {
+  background: rgba(212, 175, 55, 0.35);
+  border-color: #FFFFFF;
+  transform: translateY(-50%) scale(1.12);
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.8);
+}
+
+.gallery-lightbox-nav:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.gallery-lightbox-prev {
+  left: max(16px, env(safe-area-inset-left, 16px));
+}
+
+.gallery-lightbox-next {
+  right: max(16px, env(safe-area-inset-right, 16px));
+}
+
+/* Lightbox Top Header Bar & Floating Counter Badge */
+.gallery-lightbox-header {
+  position: fixed !important;
+  top: max(20px, env(safe-area-inset-top, 20px)) !important;
+  left: max(20px, env(safe-area-inset-left, 20px)) !important;
+  z-index: 9999999 !important;
+  display: flex !important;
+  align-items: center !important;
+  pointer-events: auto !important;
+}
+
+.gallery-lightbox-counter {
+  font-family: var(--font-tech, 'Space Grotesk', sans-serif);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  background: rgba(14, 12, 27, 0.75);
+  border: 1.5px solid var(--neon-gold, #D4AF37);
+  padding: 6px 14px;
+  border-radius: 20px;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 12px rgba(212, 175, 55, 0.25);
+  display: inline-flex;
+  align-items: center;
+}
+
+html.tier-ultra-lite .gallery-lightbox-counter {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: #141426 !important;
+}
+
+html.tier-ultra-lite .gallery-lightbox-nav {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: #141426 !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5) !important;
+}
+
 .gallery-lightbox-container {
   position: relative;
   max-width: 90vw !important;
@@ -2447,7 +2581,7 @@ body.drawer-body-lock {
 .gallery-lightbox-media {
   position: relative;
   max-width: 90vw !important;
-  max-height: calc(90vh - 54px) !important;
+  max-height: calc(88vh - 65px) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -2465,7 +2599,7 @@ body.drawer-body-lock {
 .gallery-lightbox-media img,
 #lightbox-img {
   max-width: 90vw !important;
-  max-height: calc(90vh - 54px) !important;
+  max-height: calc(88vh - 65px) !important;
   width: auto !important;
   height: auto !important;
   object-fit: contain !important;
@@ -2569,6 +2703,26 @@ body.drawer-body-lock {
     font-size: 0.82rem;
     padding: 2px 8px;
   }
+  .gallery-lightbox-nav {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 1.9rem !important;
+    background: rgba(14, 12, 27, 0.88) !important;
+  }
+  .gallery-lightbox-prev {
+    left: max(8px, env(safe-area-inset-left, 8px)) !important;
+  }
+  .gallery-lightbox-next {
+    right: max(8px, env(safe-area-inset-right, 8px)) !important;
+  }
+  .gallery-lightbox-header {
+    top: max(14px, env(safe-area-inset-top, 14px)) !important;
+    left: max(14px, env(safe-area-inset-left, 14px)) !important;
+  }
+  .gallery-lightbox-counter {
+    font-size: 0.8rem !important;
+    padding: 4px 10px !important;
+  }
 }
 
 @media (max-width: 320px) {
@@ -2585,6 +2739,14 @@ body.drawer-body-lock {
   }
   .gallery-lightbox-backdrop {
     padding: 6px !important;
+  }
+  .gallery-lightbox-header {
+    top: 8px !important;
+    left: 8px !important;
+  }
+  .gallery-lightbox-counter {
+    font-size: 0.72rem !important;
+    padding: 3px 8px !important;
   }
   .gallery-lightbox-close {
     top: 8px !important;
@@ -2923,9 +3085,9 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   bottom: 18px;
   right: 18px;
   z-index: 1500;
-  background: var(--glass-bg);
   border: 1.5px solid var(--neon-gold);
   backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   padding: 6px 14px;
   border-radius: var(--radius-full);
   display: flex;
@@ -2934,6 +3096,15 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   box-shadow: 0 0 20px var(--gold-glow);
   cursor: pointer;
   transition: var(--transition-fast);
+}
+
+html:not([data-theme="dark"]) .music-controller-widget {
+  background: var(--glass-bg);
+}
+
+html[data-theme="dark"] .music-controller-widget {
+  background: rgba(12, 10, 32, 0.85);
+  border: 1.5px solid var(--neon-gold);
 }
 
 .music-controller-widget:hover {
@@ -3811,7 +3982,7 @@ img, iframe, canvas, video, svg {
     -webkit-overflow-scrolling: touch !important;
   }
 
-  [data-theme="light"] .nav-links {
+  html:not([data-theme="dark"]) .nav-links {
     background: linear-gradient(165deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 247, 242, 0.99) 100%);
     box-shadow: -15px 0 45px rgba(0, 0, 0, 0.18);
   }
@@ -4084,12 +4255,9 @@ img, iframe, canvas, video, svg {
     height: 110px !important;
   }
 
-  .testimonial-spotlight-card {
-    padding: 1.8rem 1.2rem !important;
-  }
-
+  .testimonial-spotlight-card,
   .testimonial-card {
-    padding: 1.5rem 1.1rem !important;
+    padding: 1.6rem 1.2rem !important;
   }
 }
 
@@ -4231,11 +4399,12 @@ img, iframe, canvas, video, svg {
    -------------------------------------------------------------------------- */
 .testimonials-section {
   position: relative;
+  padding: 5rem 0 6.5rem 0;
 }
 
 .testimonial-spotlight-card {
   position: relative;
-  background: #FFFFFF !important;
+  background: #FFFFFF;
   border: 2px solid var(--neon-gold) !important;
   border-radius: var(--radius-lg);
   padding: 3rem;
@@ -4246,7 +4415,8 @@ img, iframe, canvas, video, svg {
 }
 
 [data-theme="dark"] .testimonial-spotlight-card {
-  background: #0B0826 !important;
+  background: #0B0826;
+  border: 2px solid var(--neon-gold) !important;
   border-color: var(--neon-gold) !important;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5) !important;
 }
@@ -4350,6 +4520,7 @@ img, iframe, canvas, video, svg {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 2rem;
+  margin-bottom: 2rem;
 }
 
 @media (max-width: 768px) {
@@ -4360,7 +4531,7 @@ img, iframe, canvas, video, svg {
 
 .testimonial-card {
   position: relative;
-  background: #FFFFFF !important;
+  background: #FFFFFF;
   border: 1.5px solid var(--glass-border);
   border-radius: var(--radius-md);
   padding: 2.2rem;
@@ -4372,9 +4543,10 @@ img, iframe, canvas, video, svg {
 }
 
 [data-theme="dark"] .testimonial-card {
-  background: #0B0826 !important;
-  border-color: rgba(255, 215, 0, 0.25) !important;
-  box-shadow: 0 10px 40px -5px rgba(212, 175, 55, 0.2), 0 4px 15px -3px rgba(233, 30, 99, 0.15) !important;
+  background: #0B0826;
+  border: 1.5px solid var(--neon-gold) !important;
+  border-color: var(--neon-gold) !important;
+  box-shadow: 0 10px 40px -5px rgba(212, 175, 55, 0.25), 0 4px 15px -3px rgba(0, 0, 0, 0.6) !important;
 }
 
 .testimonial-card:hover {
@@ -4762,6 +4934,46 @@ button[disabled] {
   font-weight: 800;
 }
 
+/* Dark Mode Captcha UI */
+html[data-theme="dark"] .captcha-container {
+  background: rgba(16, 18, 44, 0.75);
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+html[data-theme="dark"] .captcha-question {
+  color: var(--neon-gold, #FFD700);
+  text-shadow: 0 0 12px rgba(255, 215, 0, 0.35);
+}
+
+html[data-theme="dark"] .captcha-input {
+  background: rgba(8, 10, 26, 0.85);
+  border: 1.5px solid rgba(255, 215, 0, 0.4);
+  color: #FFFFFF;
+}
+
+html[data-theme="dark"] .captcha-input::placeholder {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+html[data-theme="dark"] .captcha-input:focus {
+  outline: none;
+  border-color: var(--neon-gold, #FFD700);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.45);
+}
+
+html[data-theme="dark"] .captcha-input.success {
+  border-color: #00E676;
+  background: rgba(0, 230, 118, 0.12);
+  color: #00E676;
+}
+
+html[data-theme="dark"] .captcha-input.error {
+  border-color: #FF1744;
+  background: rgba(255, 23, 68, 0.12);
+  color: #FF5252;
+}
+
 /* ==========================================================================
    DEDICATED MOBILE QUICK-ACTION CALL & CONTACT BAR (ULTRA-SMOOTH MOBILE APPS FEEL)
    ========================================================================== */
@@ -4769,24 +4981,37 @@ button[disabled] {
   display: none;
 }
 
-@media (max-width: 1024px) {
+@media (min-width: 993px) {
   .mobile-quick-call-bar {
-    display: block;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    z-index: 10000;
-    background: rgba(255, 255, 255, 0.94);
+    display: none !important;
+  }
+}
+
+@media (max-width: 992px) {
+  .mobile-quick-call-bar {
+    display: block !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    z-index: 10000 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border-top: 1.5px solid var(--neon-gold);
     box-shadow: 0 -6px 25px rgba(0, 0, 0, 0.12), 0 0 15px rgba(212, 175, 55, 0.2);
     padding: 6px 12px calc(6px + env(safe-area-inset-bottom)) 12px;
-    transform: translateZ(0);
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
   }
 
-  [data-theme="dark"] .mobile-quick-call-bar {
+  html:not([data-theme="dark"]) .mobile-quick-call-bar {
+    background: rgba(255, 255, 255, 0.94);
+  }
+
+  html[data-theme="dark"] .mobile-quick-call-bar {
     background: rgba(11, 8, 38, 0.95);
     box-shadow: 0 -6px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.25);
   }
@@ -5465,6 +5690,16 @@ textarea:focus-visible,
     gap: 2rem;
   }
 
+  /* Testimonials Section & Container Spacing on 1080p+ and 4K TV Displays */
+  .testimonials-section {
+    padding: 7rem 0 8.5rem 0 !important;
+  }
+
+  .testimonials-grid {
+    gap: 2.8rem !important;
+    margin-bottom: 2.5rem !important;
+  }
+
   /* TV D-Pad / Remote Control Focus State */
   a:focus-visible,
   button:focus-visible,
@@ -5489,6 +5724,15 @@ textarea:focus-visible,
   .footer-container,
   .main-content {
     max-width: 1800px !important;
+  }
+
+  .testimonials-section {
+    padding: 8.5rem 0 10.5rem 0 !important;
+  }
+
+  .testimonials-grid {
+    gap: 3.2rem !important;
+    margin-bottom: 3rem !important;
   }
 }
 
@@ -5572,6 +5816,21 @@ html {
   opacity: 1 !important;
   transform: translateY(0) translateZ(0);
   will-change: auto;
+}
+
+/* Guaranteed 100% Visibility for Footer (Footer sits outside .page-view) */
+footer,
+footer .scroll-reveal,
+footer .reveal-item,
+.footer,
+.footer .scroll-reveal,
+.footer .reveal-item,
+.site-footer,
+.site-footer .scroll-reveal,
+.site-footer .reveal-item {
+  opacity: 1 !important;
+  transform: none !important;
+  visibility: visible !important;
 }
 
 /* Task 2: Cascading Stagger Delays for Grids */
@@ -5712,12 +5971,17 @@ html {
     box-sizing: border-box !important;
   }
 
-  /* 4. Testimonials Grid */
+  /* 4. Testimonials Section & Grid Spacing on Tablet */
+  .testimonials-section {
+    padding: 4.5rem 0 5.5rem 0 !important;
+  }
+
   .testimonials-grid {
     display: flex !important;
     flex-wrap: wrap !important;
     justify-content: center !important;
     gap: 2rem !important;
+    margin-bottom: 2rem !important;
   }
 
   .testimonials-grid > .testimonial-card,
@@ -5749,12 +6013,23 @@ html {
   }
 
   /* Testimonials Section & Container Uniform Alignment */
+  .testimonials-section,
+  .testimonials-section .container {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Distinct breathing room separating testimonials from the footer */
+  .testimonials-section {
+    padding: 3.5rem 0 4.8rem 0 !important;
+  }
+
   .testimonials-section .container {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
+    margin: 0 auto !important;
   }
 
   /* All Three Testimonial Containers - Uniform Width & Alignment */
@@ -5766,17 +6041,19 @@ html {
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
     box-sizing: border-box !important;
   }
 
   /* Container 1: Featured Spotlight Card */
   .testimonial-spotlight-card {
-    display: block !important;
-    margin-bottom: 1.5rem !important;
-    border-radius: var(--radius-lg, 18px) !important;
-    padding: 1.8rem 1.4rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    margin: 0 0 1.25rem 0 !important;
+    border-radius: var(--radius-md, 18px) !important;
+    padding: 1.6rem 1.4rem !important;
     text-align: center !important;
   }
 
@@ -5784,8 +6061,8 @@ html {
   .testimonials-grid {
     display: flex !important;
     flex-direction: column !important;
-    gap: 1.5rem !important;
-    margin: 0 auto !important;
+    gap: 1.25rem !important;
+    margin: 0 0 1.5rem 0 !important;
     padding: 0 !important;
   }
 
@@ -5797,8 +6074,9 @@ html {
     flex-direction: column !important;
     justify-content: space-between !important;
     flex: 1 1 100% !important;
-    border-radius: var(--radius-lg, 18px) !important;
-    padding: 1.8rem 1.4rem !important;
+    margin: 0 !important;
+    border-radius: var(--radius-md, 18px) !important;
+    padding: 1.6rem 1.4rem !important;
   }
 
   /* Spotlight Badge Perfect Centering on Mobile */
@@ -5880,23 +6158,32 @@ html {
 }
 
 @media (max-width: 480px) {
+  .testimonials-section {
+    padding: 2.8rem 0 4rem 0 !important;
+  }
+
   .testimonial-spotlight-card,
   .testimonials-grid > .testimonial-card,
   .testimonial-card {
-    padding: 1.5rem 1.15rem !important;
+    padding: 1.4rem 1.15rem !important;
     border-radius: 14px !important;
   }
 
   .testimonial-spotlight-card {
-    margin-bottom: 1.25rem !important;
+    margin-bottom: 1.15rem !important;
   }
 
   .testimonials-grid {
-    gap: 1.25rem !important;
+    gap: 1.15rem !important;
+    margin-bottom: 1.25rem !important;
   }
 }
 
 @media (max-width: 359px) {
+  .testimonials-section {
+    padding: 2.2rem 0 3.2rem 0 !important;
+  }
+
   .testimonial-spotlight-card,
   .testimonials-grid > .testimonial-card,
   .testimonial-card {
@@ -5910,6 +6197,7 @@ html {
 
   .testimonials-grid {
     gap: 1rem !important;
+    margin-bottom: 1rem !important;
   }
 }
 
@@ -5925,6 +6213,61 @@ html {
    - TIER 2: html.tier-balanced (Mid-Range Phones) -> Locked 60fps, No Blur Lag
    - TIER 3: html.tier-ultra-lite (Budget <= 4GB RAM & JioPhone) -> Zero-Lag Pure Performance
    ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   TIER 1: FULL PROFILE (Desktop, Laptop, Large Tablet, Flagship Hardware)
+   - 100% Authentic Translucent Frosted Glassmorphism in Light & Dark Mode
+   - Beautiful Falling Flowers Canvas Engine Running Smoothly at 60-120fps
+   - Razor-Sharp Text, Luminous Golden Accents & Vibrant Depth
+   -------------------------------------------------------------------------- */
+html.tier-full[data-theme="dark"] .course-card,
+html.tier-full[data-theme="dark"] .stat-box,
+html.tier-full[data-theme="dark"] .testimonial-card,
+html.tier-full[data-theme="dark"] .testimonial-spotlight-card,
+html.tier-full[data-theme="dark"] .highlight-card,
+html.tier-full[data-theme="dark"] .about-card-glow,
+html.tier-full[data-theme="dark"] .diploma-roadmap-card,
+html.tier-full[data-theme="dark"] .form-glass-card,
+html.tier-full[data-theme="dark"] .summary-card,
+html.tier-full[data-theme="dark"] .captcha-container {
+  background: rgba(16, 18, 42, 0.58) !important;
+  backdrop-filter: blur(14px) saturate(135%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(135%) !important;
+  border: 1.5px solid rgba(255, 215, 0, 0.35) !important;
+}
+
+html.tier-full[data-theme="dark"] .testimonial-card,
+html.tier-full[data-theme="dark"] .testimonial-spotlight-card {
+  border: 1.5px solid var(--neon-gold) !important;
+  border-color: var(--neon-gold) !important;
+}
+
+html.tier-full[data-theme="dark"] .site-header {
+  background: rgba(10, 8, 28, 0.62) !important;
+  backdrop-filter: blur(20px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(140%) !important;
+  border-bottom: 1.5px solid rgba(255, 215, 0, 0.35) !important;
+}
+
+html.tier-full[data-theme="dark"] .music-controller-widget {
+  background: rgba(12, 10, 32, 0.65) !important;
+  backdrop-filter: blur(16px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+  border: 1.5px solid var(--neon-gold) !important;
+}
+
+html.tier-full[data-theme="dark"] .mobile-drawer-content {
+  background: rgba(10, 8, 28, 0.82) !important;
+  backdrop-filter: blur(24px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(140%) !important;
+}
+
+html.tier-full[data-theme="dark"] .mobile-quick-call-bar {
+  background: rgba(10, 8, 28, 0.75) !important;
+  backdrop-filter: blur(20px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(140%) !important;
+  border-top: 1.5px solid var(--neon-gold) !important;
+}
 
 /* --------------------------------------------------------------------------
    TIER 2: BALANCED PROFILE (Mid-Range Phones e.g. Dimensity 6300, 6GB-8GB Phones)
@@ -5989,33 +6332,82 @@ html.tier-balanced[data-theme="light"] .about-card-glow,
 html.tier-balanced:not([data-theme="dark"]) .about-card-glow,
 html.tier-balanced[data-theme="light"] .diploma-roadmap-card,
 html.tier-balanced:not([data-theme="dark"]) .diploma-roadmap-card,
+html.tier-balanced[data-theme="light"] .form-glass-card,
+html.tier-balanced:not([data-theme="dark"]) .form-glass-card,
+html.tier-balanced[data-theme="light"] .summary-card,
+html.tier-balanced:not([data-theme="dark"]) .summary-card,
 html.tier-balanced[data-theme="light"] .music-controller-widget,
-html.tier-balanced:not([data-theme="dark"]) .music-controller-widget {
+html.tier-balanced:not([data-theme="dark"]) .music-controller-widget,
+html.tier-balanced[data-theme="light"] .captcha-container,
+html.tier-balanced:not([data-theme="dark"]) .captcha-container {
   background: rgba(255, 252, 245, 0.95) !important;
 }
 
 /* Semi-opaque frosted solid background in Dark Mode */
-html.tier-balanced[data-theme="dark"] .site-header {
-  background: rgba(16, 16, 26, 0.95) !important;
+html.tier-balanced[data-theme="dark"] .site-header,
+html.tier-balanced body[data-theme="dark"] .site-header,
+html.tier-balanced [data-theme="dark"] .site-header {
+  background: rgba(16, 18, 38, 0.88) !important;
 }
 
-html.tier-balanced[data-theme="dark"] .mobile-drawer-content {
-  background: rgba(16, 16, 26, 0.98) !important;
+html.tier-balanced[data-theme="dark"] .mobile-drawer-content,
+html.tier-balanced body[data-theme="dark"] .mobile-drawer-content,
+html.tier-balanced [data-theme="dark"] .mobile-drawer-content {
+  background: rgba(16, 18, 38, 0.92) !important;
 }
 
-html.tier-balanced[data-theme="dark"] .mobile-quick-call-bar {
-  background: rgba(16, 16, 26, 0.96) !important;
+html.tier-balanced[data-theme="dark"] .mobile-quick-call-bar,
+html.tier-balanced body[data-theme="dark"] .mobile-quick-call-bar,
+html.tier-balanced [data-theme="dark"] .mobile-quick-call-bar {
+  background: rgba(16, 18, 38, 0.88) !important;
 }
 
 html.tier-balanced[data-theme="dark"] .course-card,
+html.tier-balanced body[data-theme="dark"] .course-card,
+html.tier-balanced [data-theme="dark"] .course-card,
 html.tier-balanced[data-theme="dark"] .stat-box,
+html.tier-balanced body[data-theme="dark"] .stat-box,
+html.tier-balanced [data-theme="dark"] .stat-box,
 html.tier-balanced[data-theme="dark"] .testimonial-card,
+html.tier-balanced body[data-theme="dark"] .testimonial-card,
+html.tier-balanced [data-theme="dark"] .testimonial-card,
 html.tier-balanced[data-theme="dark"] .testimonial-spotlight-card,
+html.tier-balanced body[data-theme="dark"] .testimonial-spotlight-card,
+html.tier-balanced [data-theme="dark"] .testimonial-spotlight-card,
 html.tier-balanced[data-theme="dark"] .highlight-card,
+html.tier-balanced body[data-theme="dark"] .highlight-card,
+html.tier-balanced [data-theme="dark"] .highlight-card,
 html.tier-balanced[data-theme="dark"] .about-card-glow,
+html.tier-balanced body[data-theme="dark"] .about-card-glow,
+html.tier-balanced [data-theme="dark"] .about-card-glow,
 html.tier-balanced[data-theme="dark"] .diploma-roadmap-card,
-html.tier-balanced[data-theme="dark"] .music-controller-widget {
-  background: rgba(16, 16, 26, 0.95) !important;
+html.tier-balanced body[data-theme="dark"] .diploma-roadmap-card,
+html.tier-balanced [data-theme="dark"] .diploma-roadmap-card,
+html.tier-balanced[data-theme="dark"] .form-glass-card,
+html.tier-balanced body[data-theme="dark"] .form-glass-card,
+html.tier-balanced [data-theme="dark"] .form-glass-card,
+html.tier-balanced[data-theme="dark"] .summary-card,
+html.tier-balanced body[data-theme="dark"] .summary-card,
+html.tier-balanced [data-theme="dark"] .summary-card,
+html.tier-balanced[data-theme="dark"] .music-controller-widget,
+html.tier-balanced body[data-theme="dark"] .music-controller-widget,
+html.tier-balanced [data-theme="dark"] .music-controller-widget,
+html.tier-balanced[data-theme="dark"] .captcha-container,
+html.tier-balanced body[data-theme="dark"] .captcha-container,
+html.tier-balanced [data-theme="dark"] .captcha-container {
+  background: rgba(18, 20, 44, 0.92) !important;
+  border-color: rgba(255, 215, 0, 0.25) !important;
+}
+
+/* Vibrant golden border for all testimonial cards in Tier 2 Dark Mode */
+html.tier-balanced[data-theme="dark"] .testimonial-card,
+html.tier-balanced body[data-theme="dark"] .testimonial-card,
+html.tier-balanced [data-theme="dark"] .testimonial-card,
+html.tier-balanced[data-theme="dark"] .testimonial-spotlight-card,
+html.tier-balanced body[data-theme="dark"] .testimonial-spotlight-card,
+html.tier-balanced [data-theme="dark"] .testimonial-spotlight-card {
+  border: 1.5px solid var(--neon-gold) !important;
+  border-color: var(--neon-gold) !important;
 }
 
 /* 2. Stop ONLY CPU-bound border-radius morphing while preserving static rounded shape & soft border/glow */
@@ -6135,28 +6527,70 @@ html.tier-ultra-lite:not([data-theme="dark"]) .site-header,
 html.tier-ultra-lite[data-theme="light"] .mobile-drawer-content,
 html.tier-ultra-lite:not([data-theme="dark"]) .mobile-drawer-content,
 html.tier-ultra-lite[data-theme="light"] .mobile-quick-call-bar,
-html.tier-ultra-lite:not([data-theme="dark"]) .mobile-quick-call-bar {
+html.tier-ultra-lite:not([data-theme="dark"]) .mobile-quick-call-bar,
+html.tier-ultra-lite[data-theme="light"] .captcha-container,
+html.tier-ultra-lite:not([data-theme="dark"]) .captcha-container {
   background: #FAF8F5 !important;
   border: 1px solid rgba(212, 175, 55, 0.3) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
 }
 
 html.tier-ultra-lite[data-theme="dark"] .course-card,
+html.tier-ultra-lite body[data-theme="dark"] .course-card,
+html.tier-ultra-lite [data-theme="dark"] .course-card,
 html.tier-ultra-lite[data-theme="dark"] .stat-box,
+html.tier-ultra-lite body[data-theme="dark"] .stat-box,
+html.tier-ultra-lite [data-theme="dark"] .stat-box,
 html.tier-ultra-lite[data-theme="dark"] .testimonial-card,
+html.tier-ultra-lite body[data-theme="dark"] .testimonial-card,
+html.tier-ultra-lite [data-theme="dark"] .testimonial-card,
 html.tier-ultra-lite[data-theme="dark"] .testimonial-spotlight-card,
+html.tier-ultra-lite body[data-theme="dark"] .testimonial-spotlight-card,
+html.tier-ultra-lite [data-theme="dark"] .testimonial-spotlight-card,
 html.tier-ultra-lite[data-theme="dark"] .highlight-card,
+html.tier-ultra-lite body[data-theme="dark"] .highlight-card,
+html.tier-ultra-lite [data-theme="dark"] .highlight-card,
 html.tier-ultra-lite[data-theme="dark"] .about-card-glow,
+html.tier-ultra-lite body[data-theme="dark"] .about-card-glow,
+html.tier-ultra-lite [data-theme="dark"] .about-card-glow,
 html.tier-ultra-lite[data-theme="dark"] .diploma-roadmap-card,
+html.tier-ultra-lite body[data-theme="dark"] .diploma-roadmap-card,
+html.tier-ultra-lite [data-theme="dark"] .diploma-roadmap-card,
 html.tier-ultra-lite[data-theme="dark"] .form-glass-card,
+html.tier-ultra-lite body[data-theme="dark"] .form-glass-card,
+html.tier-ultra-lite [data-theme="dark"] .form-glass-card,
 html.tier-ultra-lite[data-theme="dark"] .summary-card,
+html.tier-ultra-lite body[data-theme="dark"] .summary-card,
+html.tier-ultra-lite [data-theme="dark"] .summary-card,
 html.tier-ultra-lite[data-theme="dark"] .music-controller-widget,
+html.tier-ultra-lite body[data-theme="dark"] .music-controller-widget,
+html.tier-ultra-lite [data-theme="dark"] .music-controller-widget,
 html.tier-ultra-lite[data-theme="dark"] .site-header,
+html.tier-ultra-lite body[data-theme="dark"] .site-header,
+html.tier-ultra-lite [data-theme="dark"] .site-header,
 html.tier-ultra-lite[data-theme="dark"] .mobile-drawer-content,
-html.tier-ultra-lite[data-theme="dark"] .mobile-quick-call-bar {
-  background: #0E0C1B !important;
-  border: 1px solid rgba(212, 175, 55, 0.3) !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+html.tier-ultra-lite body[data-theme="dark"] .mobile-drawer-content,
+html.tier-ultra-lite [data-theme="dark"] .mobile-drawer-content,
+html.tier-ultra-lite[data-theme="dark"] .mobile-quick-call-bar,
+html.tier-ultra-lite body[data-theme="dark"] .mobile-quick-call-bar,
+html.tier-ultra-lite [data-theme="dark"] .mobile-quick-call-bar,
+html.tier-ultra-lite[data-theme="dark"] .captcha-container,
+html.tier-ultra-lite body[data-theme="dark"] .captcha-container,
+html.tier-ultra-lite [data-theme="dark"] .captcha-container {
+  background: #141426 !important;
+  border: 1px solid rgba(255, 215, 0, 0.25) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* Vibrant golden border for all testimonial cards in Tier 3 Dark Mode */
+html.tier-ultra-lite[data-theme="dark"] .testimonial-card,
+html.tier-ultra-lite body[data-theme="dark"] .testimonial-card,
+html.tier-ultra-lite [data-theme="dark"] .testimonial-card,
+html.tier-ultra-lite[data-theme="dark"] .testimonial-spotlight-card,
+html.tier-ultra-lite body[data-theme="dark"] .testimonial-spotlight-card,
+html.tier-ultra-lite [data-theme="dark"] .testimonial-spotlight-card {
+  border: 1.5px solid var(--neon-gold) !important;
+  border-color: var(--neon-gold) !important;
 }
 
 /* 3. Force instant visibility for scroll-reveal items (eliminates blank white tiles while scrolling) */
@@ -6320,6 +6754,11 @@ html.tier-ultra-lite .mobile-drawer-link {
     line-height: 1.45 !important;
   }
 
+  /* Testimonials Section & Grid Spacing on Keypad Phones */
+  .testimonials-section {
+    padding: 1.6rem 0 2.5rem 0 !important;
+  }
+
   /* Force Clean Single-Column Grid Stacking */
   .courses-grid,
   .stats-grid,
@@ -6331,13 +6770,22 @@ html.tier-ultra-lite .mobile-drawer-link {
     gap: 12px !important;
   }
 
+  .testimonials-grid {
+    margin-bottom: 14px !important;
+  }
+
   .course-card,
   .stat-box,
   .testimonial-card,
+  .testimonial-spotlight-card,
   .highlight-card,
   .about-card-glow {
     padding: 12px 10px !important;
     border-radius: 10px !important;
+  }
+
+  .testimonial-spotlight-card {
+    margin-bottom: 12px !important;
   }
 
   .founder-cloud-wrapper {
