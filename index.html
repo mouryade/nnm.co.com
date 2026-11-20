@@ -37,35 +37,117 @@
   <link rel="preload" as="image" href="assets/Gallery/thumbs/Pic. 7.webp">
   <link rel="preload" as="image" href="assets/Gallery/thumbs/Pic. 8.webp">
 
-  <!-- 3-Tier Adaptive Performance Pre-Paint Detection Engine (Zero-Jank Hardware Scaler) -->
+  <!-- 3-Tier Hardware-First Engine, Zero-Flash Theme & Instant Hash Route Pre-Tag -->
   <script>
     (function() {
+      // 0. Initial-Paint Transition Lock: Completely prevent white-to-dark flash on navbar/music bar
+      document.documentElement.classList.add('no-theme-transition');
+
+      // 1. Zero White-Theme Flash (FOUC): Synchronously restore data-theme before CSS paints
       try {
-        var cached = sessionStorage.getItem('nnm_perf_tier');
+        var savedTheme = localStorage.getItem('nnm_theme') || sessionStorage.getItem('nnm_session_theme');
+        if (savedTheme) {
+          document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+      } catch (themeErr) {}
+
+      // 1b. Zero Music Label Flicker: Synchronously restore data-music-pref before paint
+      try {
+        var savedMusicPref = localStorage.getItem('nnm_music_pref');
+        if (savedMusicPref === 'off') {
+          document.documentElement.setAttribute('data-music-pref', 'off');
+        } else {
+          document.documentElement.setAttribute('data-music-pref', 'on');
+        }
+      } catch (musicErr) {}
+
+      // 2. Zero #home Flash on Reload: Detect active non-home route and pre-tag <html>
+      try {
+        var hash = (window.location.hash || '').replace('#', '');
+        var savedRoute = sessionStorage.getItem('nnm_active_section') || '';
+        var activeRoute = hash || savedRoute;
+        var validRoutes = ['about', 'courses', 'gallery', 'testimonials', 'form', 'contact'];
+        if (activeRoute && validRoutes.indexOf(activeRoute) !== -1) {
+          document.documentElement.setAttribute('data-init-route', activeRoute);
+        }
+      } catch (routeErr) {}
+
+      // 3. Hardware-First Persistent 3-Tier Detection (v3 Engine - Rescues Poisoned Desktop Locks)
+      try {
+        // Clean up legacy v1 and v2 tier keys so poisoned devices are freed immediately
+        try {
+          localStorage.removeItem('nnm_perf_tier');
+          localStorage.removeItem('nnm_perf_tier_v2');
+        } catch (cleanErr) {}
+
+        var cached = null;
+        try {
+          cached = localStorage.getItem('nnm_perf_tier_v3');
+        } catch (storageErr) {}
+
         if (cached === 'tier-ultra-lite') {
           document.documentElement.classList.add('tier-ultra-lite');
+          document.documentElement.setAttribute('data-perf-tier', 'tier-ultra-lite');
           return;
         }
+
         var sw = (window.screen && window.screen.width) ? window.screen.width : window.innerWidth;
         var ua = navigator.userAgent || '';
-        var isKeypadOrTiny = sw <= 320 || /KaiOS|JioPhone|Opera Mini|UCBrowser/i.test(ua);
-        var isMobileWidth = window.innerWidth <= 992;
+        var isKeypadOrTiny = sw <= 320 && /KaiOS|JioPhone|Opera Mini|UCBrowser/i.test(ua);
         var mem = navigator.deviceMemory;
         var cores = navigator.hardwareConcurrency;
-        var isLowHardware = isMobileWidth && ((mem && mem <= 4) || (cores && cores <= 4));
         var prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        var isDataSaver = navigator.connection && navigator.connection.saveData;
+        var isDataSaver = navigator.connection && navigator.connection.saveData === true;
         var noIO = !('IntersectionObserver' in window);
 
+        // Hardware WebGL GPU Inspection
+        var isWeakGPU = false;
+        var isSoftwareGPU = false;
+        var gpuRenderer = '';
+        try {
+          var c = document.createElement('canvas');
+          var gl = c.getContext('webgl') || c.getContext('experimental-webgl');
+          if (!gl) {
+            isWeakGPU = true;
+          } else {
+            var dbg = gl.getExtension('WEBGL_debug_renderer_info');
+            gpuRenderer = dbg ? (gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) || '') : '';
+            if (/SwiftShader|llvmpipe|Software|Microsoft Basic/i.test(gpuRenderer)) {
+              isWeakGPU = true;
+              isSoftwareGPU = true;
+            } else if (/PowerVR\s*(GE8|SGX|Rogue)|Mali-(400|450|T6|T7|T8|G31)|Adreno.*(2\d\d|3\d\d|4\d\d|50[0-9]|51\d)|Intel.*HD Graphics\s*(2000|2500|3000|4000|400|500)/i.test(gpuRenderer)) {
+              isWeakGPU = true;
+            }
+          }
+        } catch (glErr) {
+          isWeakGPU = false;
+        }
+
+        // Capable Desktop PC check: Fine pointer, screen >= 1024, cores >= 4, RAM >= 4, and NOT a software/legacy GPU
+        var isCapableDesktop = window.matchMedia && window.matchMedia('(pointer: fine)').matches && sw >= 1024 && (!cores || cores >= 4) && (!mem || mem >= 4) && !isSoftwareGPU;
+
+        // Low hardware permanent criteria: ONLY genuinely weak hardware
+        var isPermanentLowHardware = !isCapableDesktop && (isWeakGPU || (mem && mem <= 2) || (cores && cores <= 2) || isKeypadOrTiny);
         var tier;
-        if (isKeypadOrTiny || isLowHardware || prefersReducedMotion || isDataSaver || noIO) {
+
+        if (isPermanentLowHardware) {
           tier = 'tier-ultra-lite';
-        } else if (isMobileWidth || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches)) {
+          try {
+            // Avoid permanently writing ultra-lite during Desktop DevTools mobile emulation
+            if (!isCapableDesktop && sw < 1024) {
+              localStorage.setItem('nnm_perf_tier_v3', 'tier-ultra-lite');
+            }
+          } catch (e) {}
+        } else if (prefersReducedMotion || isDataSaver || noIO) {
+          tier = 'tier-ultra-lite';
+        } else if ((mem && mem <= 4) || (cores && cores <= 4) || sw <= 992 || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) || /Mali-G(5|6|7)|Adreno.*(61|62)/i.test(gpuRenderer)) {
           tier = 'tier-balanced';
         } else {
           tier = 'tier-full';
         }
+
         document.documentElement.classList.add(tier);
+        document.documentElement.setAttribute('data-perf-tier', tier);
       } catch (e) {
         document.documentElement.classList.add('tier-balanced');
       }
@@ -75,7 +157,8 @@
   <!-- Custom Style Sheet -->
   <link rel="stylesheet" href="style.css">
 </head>
-<body data-theme="light">
+<body>
+  <script>(function(){var t=document.documentElement.getAttribute('data-theme')||'light';document.body.setAttribute('data-theme',t);})();</script>
 
   <!-- HTML5 Background Audio Element (Rabindra Sangeet) -->
   <audio id="bg-classical-audio" src="assets/Rabindra_Sangeet.mp3" loop preload="none"></audio>
@@ -93,6 +176,7 @@
     </div>
     <span class="music-label" id="music-status-text">&#127925; Music: ON</span>
   </div>
+  <script>(function(){if(document.documentElement.getAttribute('data-music-pref')==='off'){var el=document.getElementById('music-status-text'),w=document.getElementById('music-toggle-widget');if(el)el.innerHTML='&#128263; Music: OFF';if(w){w.classList.remove('playing');w.setAttribute('aria-pressed','false');}}})();</script>
 
   <!-- ==========================================================================
   <!-- ==========================================================================
@@ -299,12 +383,10 @@
         </div>
       </div>
     </section>
-  </div>
 
-  <!-- ==========================================================================
-       ACADEMY HIGHLIGHTS SECTION (WHY CHOOSE US)
-       ========================================================================== -->
-  <div class="page-view active" data-page-view="home">
+    <!-- ==========================================================================
+         ACADEMY HIGHLIGHTS SECTION (WHY CHOOSE US)
+         ========================================================================== -->
     <section class="academy-highlights-section">
       <div class="container">
         <div class="section-header stagger-item">
@@ -1491,9 +1573,20 @@
     </div>
   </div>
 
-  <!-- Clean Fullscreen Lightbox Gallery Modal -->
+  <!-- Clean Fullscreen Lightbox Gallery Modal with Serial Prev / Next Navigation -->
   <div class="modal-backdrop gallery-lightbox-backdrop" id="lightbox-modal" role="dialog" aria-modal="true" aria-labelledby="lightbox-title">
+    <!-- Top-aligned Lightbox Counter Badge -->
+    <div class="gallery-lightbox-header">
+      <span id="lightbox-counter" class="gallery-lightbox-counter">1 / 36</span>
+    </div>
+
+    <!-- Close Lightbox Button (Top Right) -->
     <button type="button" class="gallery-lightbox-close" id="lightboxCloseBtn" title="Close (Escape)" aria-label="Close Lightbox">&times;</button>
+    
+    <!-- Previous & Next Navigation Arrows -->
+    <button type="button" class="gallery-lightbox-nav gallery-lightbox-prev" id="lightboxPrevBtn" title="Previous Photo (Left Arrow)" aria-label="Previous Photo">&#8249;</button>
+    <button type="button" class="gallery-lightbox-nav gallery-lightbox-next" id="lightboxNextBtn" title="Next Photo (Right Arrow)" aria-label="Next Photo">&#8250;</button>
+
     <div class="gallery-lightbox-container">
       <div class="gallery-lightbox-media">
         <img id="lightbox-img" src="" alt="Gallery Photo Preview" decoding="async">
