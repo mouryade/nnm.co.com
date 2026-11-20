@@ -32,16 +32,17 @@
         }
       } catch (musicErr) {}
 
-      // 2. Hardware-First Persistent 3-Tier Detection (v3 Engine)
+      // 2. Hardware-First Persistent 3-Tier Detection (v4 Engine)
       try {
         try {
           localStorage.removeItem('nnm_perf_tier');
           localStorage.removeItem('nnm_perf_tier_v2');
+          localStorage.removeItem('nnm_perf_tier_v3');
         } catch (cleanErr) {}
 
         var cached = null;
         try {
-          cached = localStorage.getItem('nnm_perf_tier_v3');
+          cached = localStorage.getItem('nnm_perf_tier_v4');
         } catch (storageErr) {}
 
         if (cached === 'tier-ultra-lite') {
@@ -93,7 +94,7 @@
           tier = 'tier-ultra-lite';
           try {
             if (!isCapableDesktop && sw < 1024) {
-              localStorage.setItem('nnm_perf_tier_v3', 'tier-ultra-lite');
+              localStorage.setItem('nnm_perf_tier_v4', 'tier-ultra-lite');
             }
           } catch (e) {}
         } else if (prefersReducedMotion || isDataSaver || noIO) {
@@ -519,6 +520,27 @@
     .music-widget.playing .eq-bar:nth-child(4) { animation: eq 1.05s ease-in-out infinite alternate 0.10s; }
     @keyframes eq { from { height: 3px; } to { height: 15px; } }
 
+    @keyframes tapPulse {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(212,175,55,0.45);
+      }
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 25px rgba(233,30,99,0.6);
+      }
+    }
+
+    .music-widget.music-waiting-tap {
+      animation: tapPulse 1.8s infinite ease-in-out !important;
+      border-color: #E91E63 !important;
+    }
+
+    html.tier-ultra-lite .music-widget.music-waiting-tap {
+      animation: none !important;
+      border-color: var(--gold) !important;
+    }
+
     .music-label {
       font-family: var(--font-mod);
       font-size: 0.78rem;
@@ -608,6 +630,7 @@
   <audio id="bg-audio" preload="none" loop>
     <source src="assets/Rabindra_Sangeet.mp3" type="audio/mpeg">
   </audio>
+  <script>window.addEventListener('load',function(){setTimeout(function(){var a=document.getElementById('bg-audio');if(a&&a.preload==='none')a.preload='metadata';},1500);});</script>
 
   <!-- Centered page content -->
   <main class="page-wrapper">
@@ -669,7 +692,7 @@
     </div>
     <span class="music-label" id="music-label">&#127925; Music: ON</span>
   </div>
-  <script>(function(){if(document.documentElement.getAttribute('data-music-pref')==='off'){var el=document.getElementById('music-label'),w=document.getElementById('music-widget');if(el)el.innerHTML='&#128263; Music: OFF';if(w){w.classList.remove('playing');w.setAttribute('aria-pressed','false');}}})();</script>
+  <script>(function(){var pref='on';try{pref=localStorage.getItem('nnm_music_pref')||'on';var oldMuted=localStorage.getItem('nnm_audio_muted');if(oldMuted==='true'&&!localStorage.getItem('nnm_music_pref'))pref='off';}catch(e){}var el=document.getElementById('music-label'),w=document.getElementById('music-widget');if(pref==='off'){if(el)el.innerHTML='&#128263; Music: OFF';if(w){w.classList.remove('playing','music-waiting-tap');w.setAttribute('aria-pressed','false');}}else{var isMobile=(window.matchMedia&&window.matchMedia('(pointer: coarse)').matches)||(((window.screen&&window.screen.width)?window.screen.width:window.innerWidth)<=992);if(isMobile){if(el)el.innerHTML='&#127925; Tap for Music';if(w){w.classList.add('music-waiting-tap');w.classList.remove('playing');w.setAttribute('aria-pressed','false');}}else{if(el)el.innerHTML='&#127925; Music: ON';if(w){w.classList.add('playing');w.classList.remove('music-waiting-tap');w.setAttribute('aria-pressed','true');}}}})();</script>
 
   <script>
   'use strict';
@@ -831,20 +854,34 @@
     if (audio.volume > TARGET_VOL) audio.volume = TARGET_VOL;
   });
 
-  // Update Widget UI directly based on User Preference
+  // Update Widget UI directly based on User Preference & Playback State
   function updateUI() {
     var pref = getMusicPref();
     document.documentElement.setAttribute('data-music-pref', pref);
-    if (pref === 'on') {
+    if (pref === 'off') {
+      widget.classList.remove('playing', 'music-waiting-tap');
+      widget.setAttribute('aria-pressed', 'false');
+      if (lbl) lbl.innerHTML = '&#128263; Music: OFF';
+    } else if (audio && !audio.paused) {
       widget.classList.add('playing');
+      widget.classList.remove('music-waiting-tap');
       widget.setAttribute('aria-pressed', 'true');
       if (lbl) lbl.innerHTML = '&#127925; Music: ON';
     } else {
       widget.classList.remove('playing');
+      widget.classList.add('music-waiting-tap');
       widget.setAttribute('aria-pressed', 'false');
-      if (lbl) lbl.innerHTML = '&#128263; Music: OFF';
+      if (lbl) lbl.innerHTML = '&#127925; Tap for Music';
     }
   }
+
+  // Synchronize widget state with native audio events
+  audio.addEventListener('play', updateUI);
+  audio.addEventListener('playing', function() {
+    removeGestureListeners();
+    updateUI();
+  });
+  audio.addEventListener('pause', updateUI);
 
   // ---- One-time safe position restoration (prevents loop seek-traps) ----
   var hasRestoredInitialTime = false;
@@ -924,7 +961,8 @@
 
   // ---- Global Gesture Fallback for Mobile Autoplay Restrictions ----
   var gestureActive = false;
-  var gestureEvents = ['pointerdown', 'touchstart', 'click', 'keydown'];
+  var isUnlocking = false;
+  var gestureEvents = ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'click', 'keydown', 'scroll'];
 
   function removeGestureListeners() {
     if (!gestureActive) return;
@@ -946,28 +984,30 @@
   }
 
   function onFirstGesture(e) {
-    if (e && e.target && typeof e.target.closest === 'function' &&
-        e.target.closest('#music-widget')) return;
-    if (getMusicPref() === 'on') {
-      if (!hasRestoredInitialTime) audioRestoreTime();
-      audio.muted = false;
-      audio.volume = TARGET_VOL;
-      var retryP = audio.play();
-      if (retryP && typeof retryP.then === 'function') {
-        retryP.then(function() {
-          removeGestureListeners();
-        }).catch(function(){});
-      }
-    } else {
+    if (getMusicPref() !== 'on') {
       removeGestureListeners();
+      return;
+    }
+    if (!audio || !audio.paused || isUnlocking) return;
+    isUnlocking = true;
+    if (!hasRestoredInitialTime) audioRestoreTime();
+    audio.muted = false;
+    audio.volume = TARGET_VOL;
+    var retryP = audio.play();
+    if (retryP && typeof retryP.then === 'function') {
+      retryP.then(function() {
+        removeGestureListeners();
+        isUnlocking = false;
+        updateUI();
+      }).catch(function() {
+        isUnlocking = false;
+        updateUI();
+      });
+    } else {
+      isUnlocking = false;
+      updateUI();
     }
   }
-
-  audio.addEventListener('playing', function() {
-    if (getMusicPref() === 'on') {
-      removeGestureListeners();
-    }
-  });
 
   // ---- Play / Pause ----
   function playAudio() {
@@ -984,9 +1024,13 @@
     if (p && typeof p.then === 'function') {
       p.then(function() {
         removeGestureListeners();
+        updateUI();
       }).catch(function() {
         attachGestureFallback();
+        updateUI();
       });
+    } else {
+      updateUI();
     }
   }
 
@@ -1010,12 +1054,12 @@
       e.stopPropagation();
       if (e.preventDefault) e.preventDefault();
     }
-    if (getMusicPref() === 'on') {
+    var pref = getMusicPref();
+    if (pref === 'on' && audio && !audio.paused) {
       setMusicPref('off');
       pauseAudio();
     } else {
       setMusicPref('on');
-      updateUI();
       playAudio();
     }
   }
