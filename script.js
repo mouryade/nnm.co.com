@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    NATARAJ NRITYA MANDIR (HOW/62) - MULTI-PAGE SPA & RELIABLE AUDIO ENGINE
    ========================================================================== */
 
@@ -51,6 +51,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // 13. Real-Time Runtime FPS Watchdog (Auto-downgrades misreported budget hardware)
+  initFPSWatchdog();
 });
 
 // State flag to track if About Us stats counter has animated in current visit
@@ -367,28 +370,44 @@ function initThemeManager() {
 }
 
 /* ==========================================================================
-   3. FULL-SCREEN IMMERSIVE FLOWER & STAR RAIN CANVAS ENGINE (60-120 FPS OPTIMIZED)
+   3. FULL-SCREEN IMMERSIVE FLOWER & STAR RAIN CANVAS ENGINE (3-TIER ADAPTIVE)
    ========================================================================== */
 function initLotusCanvas() {
   const canvas = document.getElementById('cosmic-canvas');
   if (!canvas) return;
-  const ctx = canvas.getContext('2d');
 
+  // Tier 3: Zero-Lag Budget / Keypad Phones - disable canvas entirely to save 100% CPU/GPU
+  if (document.documentElement.classList.contains('tier-ultra-lite')) {
+    canvas.style.display = 'none';
+    return;
+  }
+
+  const ctx = canvas.getContext('2d');
   let width = (canvas.width = window.innerWidth);
   let height = (canvas.height = window.innerHeight);
 
-  let resizeDebounce = null;
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeDebounce);
-    resizeDebounce = setTimeout(() => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-      createParticles();
-    }, 150);
-  }, { passive: true });
-
   const particles = [];
+  let isCanvasActive = true;
+  let rafId = null;
+
+  // Expose global terminator so Runtime FPS Watchdog can cancel immediately on downgrade
+  window.stopLotusCanvas = function() {
+    isCanvasActive = false;
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+    try {
+      ctx.clearRect(0, 0, width, height);
+      canvas.style.display = 'none';
+    } catch (e) {}
+  };
+
+  // Particle counts: Full desktop = 75 (or 32 on mobile full); Tier Balanced = ~35% of desktop (~26 particles)
   function getOptimalParticleCount() {
+    if (document.documentElement.classList.contains('tier-balanced')) {
+      return 26; // Capped to ~35% of desktop count for balanced 60fps scrolling
+    }
     return window.innerWidth <= 768 ? 32 : 75;
   }
 
@@ -414,17 +433,63 @@ function initLotusCanvas() {
 
   createParticles();
 
+  let resizeDebounce = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeDebounce);
+    resizeDebounce = setTimeout(() => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      createParticles();
+    }, 150);
+  }, { passive: true });
+
   // Tab Visibility Lifecycle Management (Stops GPU/CPU Burn When Tab Inactive)
-  let isCanvasActive = true;
   document.addEventListener('visibilitychange', () => {
-    isCanvasActive = !document.hidden;
-    if (isCanvasActive) {
-      requestAnimationFrame(render);
+    isCanvasActive = !document.hidden && !document.documentElement.classList.contains('tier-ultra-lite');
+    if (isCanvasActive && !rafId) {
+      lastRenderTimestamp = performance.now();
+      rafId = requestAnimationFrame(render);
     }
   });
 
-  function render() {
-    if (!isCanvasActive) return;
+  // Tier-Balanced Scroll-Pause Optimization:
+  // While scrolling actively, pause redraw loop (existing particles stay statically on screen, 0 GPU draw calls)
+  let isScrolling = false;
+  let scrollResumeTimer = null;
+  window.addEventListener('scroll', () => {
+    if (!document.documentElement.classList.contains('tier-balanced')) return;
+    isScrolling = true;
+    clearTimeout(scrollResumeTimer);
+    scrollResumeTimer = setTimeout(() => {
+      isScrolling = false;
+    }, 150);
+  }, { passive: true });
+
+  let lastRenderTimestamp = 0;
+  const balancedFrameInterval = 1000 / 24; // Throttle to ~24 FPS on tier-balanced (~41.6ms)
+
+  function render(timestamp) {
+    if (!isCanvasActive || document.documentElement.classList.contains('tier-ultra-lite')) {
+      rafId = null;
+      return;
+    }
+
+    const currentTierBalanced = document.documentElement.classList.contains('tier-balanced');
+
+    if (currentTierBalanced) {
+      // If actively scrolling on mid-range phone, pause canvas redrawing to lock 60fps scroll
+      if (isScrolling) {
+        rafId = requestAnimationFrame(render);
+        return;
+      }
+
+      // Throttle rendering to ~24 FPS
+      if (timestamp - lastRenderTimestamp < balancedFrameInterval) {
+        rafId = requestAnimationFrame(render);
+        return;
+      }
+      lastRenderTimestamp = timestamp;
+    }
 
     ctx.clearRect(0, 0, width, height);
     const isMobile = window.innerWidth <= 768;
@@ -457,7 +522,7 @@ function initLotusCanvas() {
         ctx.arc(0, 0, p.radius, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
         ctx.globalAlpha = p.alpha;
-        if (!isMobile) {
+        if (!isMobile && !currentTierBalanced) {
           ctx.shadowBlur = 8;
           ctx.shadowColor = p.color;
         }
@@ -466,10 +531,103 @@ function initLotusCanvas() {
       ctx.restore();
     });
 
-    requestAnimationFrame(render);
+    rafId = requestAnimationFrame(render);
   }
 
-  render();
+  rafId = requestAnimationFrame(render);
+}
+
+/* ==========================================================================
+   3b. REAL-TIME RUNTIME FPS WATCHDOG (ZERO-JANK MISREPORTED HARDWARE SCALER)
+   ========================================================================== */
+function initFPSWatchdog() {
+  // If already ultra-lite, no need to monitor
+  if (document.documentElement.classList.contains('tier-ultra-lite')) return;
+
+  // Only run on mobile or touch-enabled devices
+  const isTouchOrMobile = window.innerWidth <= 992 || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+  if (!isTouchOrMobile) return;
+
+  function startWatchdog() {
+    // If downgraded while waiting for start, exit
+    if (document.documentElement.classList.contains('tier-ultra-lite')) return;
+
+    let frameCount = 0;
+    let slowFrames = 0;
+    let startTime = null;
+    let lastFrameTime = null;
+    let watchdogRafId = null;
+    const DURATION = 2500; // 2.5 seconds evaluation window
+
+    function checkFrame(now) {
+      if (!startTime) {
+        startTime = now;
+        lastFrameTime = now;
+        watchdogRafId = requestAnimationFrame(checkFrame);
+        return;
+      }
+
+      frameCount++;
+      const delta = now - lastFrameTime;
+      lastFrameTime = now;
+
+      if (delta > 80) {
+        slowFrames++;
+      }
+
+      const elapsed = now - startTime;
+
+      // Early downgrade trigger if multiple severe stutter frames detected (>= 3 frames > 80ms)
+      if (slowFrames >= 3) {
+        triggerDowngrade('Multiple heavy frame drops (>80ms) detected');
+        return;
+      }
+
+      if (elapsed < DURATION) {
+        watchdogRafId = requestAnimationFrame(checkFrame);
+      } else {
+        // 2.5 seconds completed, calculate average FPS
+        const avgFPS = (frameCount * 1000) / elapsed;
+        if (avgFPS < 28) {
+          triggerDowngrade('Average FPS (' + avgFPS.toFixed(1) + ') below 28 FPS threshold');
+        }
+      }
+    }
+
+    function triggerDowngrade(reason) {
+      if (document.documentElement.classList.contains('tier-ultra-lite')) return;
+      console.warn('[NNM Perf Engine] Auto-downgrading to tier-ultra-lite: ' + reason);
+
+      document.documentElement.classList.remove('tier-balanced', 'tier-full');
+      document.documentElement.classList.add('tier-ultra-lite');
+
+      try {
+        sessionStorage.setItem('nnm_perf_tier', 'tier-ultra-lite');
+      } catch (e) {}
+
+      // Stop canvas animation loop immediately
+      if (typeof window.stopLotusCanvas === 'function') {
+        window.stopLotusCanvas();
+      }
+
+      // Force instant visibility for scroll elements to prevent white tiles
+      const pendingReveal = document.querySelectorAll('.scroll-reveal, .reveal-item');
+      pendingReveal.forEach(el => {
+        el.classList.add('revealed', 'is-visible');
+      });
+    }
+
+    watchdogRafId = requestAnimationFrame(checkFrame);
+  }
+
+  // Refinement 2: Start 1000ms AFTER window load event to bypass initial load spikes
+  if (document.readyState === 'complete') {
+    setTimeout(startWatchdog, 1000);
+  } else {
+    window.addEventListener('load', () => {
+      setTimeout(startWatchdog, 1000);
+    });
+  }
 }
 
 /* ==========================================================================
@@ -761,6 +919,7 @@ function initClassicalAudioPlayer() {
    6. 3D TILT MICRO-INTERACTIONS (RAZOR-SHARP TEXT, SMOOTH DESKTOP & MOBILE TILT)
    ========================================================================== */
 function init3DTiltCards() {
+  if (document.documentElement.classList.contains('tier-ultra-lite')) return;
   const cards = document.querySelectorAll('.course-card, .about-card-glow, .highlight-card, .testimonial-card, .stat-box, .diploma-roadmap-card');
 
   cards.forEach((card) => {
@@ -1969,8 +2128,9 @@ function initStatsCounter() {
   const statSection = document.querySelector('.stats-grid');
   if (!statSection) return;
 
-  if (statsObserver) {
-    statsObserver.disconnect();
+  if (!('IntersectionObserver' in window) || document.documentElement.classList.contains('tier-ultra-lite')) {
+    triggerStatsCounterAnimation();
+    return;
   }
 
   statsObserver = new IntersectionObserver((entries) => {
@@ -2495,10 +2655,10 @@ function initScrollReveal() {
   const elements = document.querySelectorAll(targetSelectors.join(', '));
   if (!elements.length) return;
 
-  // Graceful fallback for ancient browsers or minimal environments without IntersectionObserver
-  if (!('IntersectionObserver' in window)) {
+  // Graceful fallback for ancient browsers without IntersectionObserver or tier-ultra-lite devices
+  if (!('IntersectionObserver' in window) || document.documentElement.classList.contains('tier-ultra-lite')) {
     elements.forEach((el) => {
-      el.classList.add('revealed');
+      el.classList.add('revealed', 'is-visible');
     });
     return;
   }
@@ -2519,7 +2679,7 @@ function initScrollReveal() {
   const observer = new IntersectionObserver((entries, obs) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        entry.target.classList.add('revealed');
+        entry.target.classList.add('revealed', 'is-visible');
         // STRICT ONCE UX RULE: unobserve immediately so it stays revealed forever
         obs.unobserve(entry.target);
       }
@@ -2542,7 +2702,7 @@ function initScrollReveal() {
     pending.forEach((el) => {
       const rect = el.getBoundingClientRect();
       if (rect.top < vh && rect.bottom > 0) {
-        el.classList.add('revealed');
+        el.classList.add('revealed', 'is-visible');
         observer.unobserve(el);
       } else {
         observer.observe(el);
