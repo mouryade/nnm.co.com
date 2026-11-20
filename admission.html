@@ -3,40 +3,109 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nataraj Nritya Mandir</title>
+  <title>Application Successful | Nataraj Nritya Mandir</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
  
-  <!-- 3-Tier Adaptive Performance Pre-Paint Detection Engine (Zero-Jank Hardware Scaler) -->
+  <!-- 3-Tier Hardware-First Engine & Zero-Flash Theme Restoration -->
   <script>
     (function() {
+      // 0. Initial-Paint Transition Lock
+      document.documentElement.classList.add('no-theme-transition');
+
+      // 1. Zero White-Theme Flash (FOUC): Synchronously restore data-theme before CSS paints
       try {
-        var cached = sessionStorage.getItem('nnm_perf_tier');
+        var savedTheme = localStorage.getItem('nnm_theme') || sessionStorage.getItem('nnm_session_theme');
+        if (savedTheme) {
+          document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+      } catch (themeErr) {}
+
+      // 1b. Zero Music Label Flicker: Synchronously restore data-music-pref before paint
+      try {
+        var savedMusicPref = localStorage.getItem('nnm_music_pref');
+        if (savedMusicPref === 'off') {
+          document.documentElement.setAttribute('data-music-pref', 'off');
+        } else {
+          document.documentElement.setAttribute('data-music-pref', 'on');
+        }
+      } catch (musicErr) {}
+
+      // 2. Hardware-First Persistent 3-Tier Detection (v3 Engine)
+      try {
+        try {
+          localStorage.removeItem('nnm_perf_tier');
+          localStorage.removeItem('nnm_perf_tier_v2');
+        } catch (cleanErr) {}
+
+        var cached = null;
+        try {
+          cached = localStorage.getItem('nnm_perf_tier_v3');
+        } catch (storageErr) {}
+
         if (cached === 'tier-ultra-lite') {
           document.documentElement.classList.add('tier-ultra-lite');
+          document.documentElement.setAttribute('data-perf-tier', 'tier-ultra-lite');
           return;
         }
+
         var sw = (window.screen && window.screen.width) ? window.screen.width : window.innerWidth;
         var ua = navigator.userAgent || '';
-        var isKeypadOrTiny = sw <= 320 || /KaiOS|JioPhone|Opera Mini|UCBrowser/i.test(ua);
-        var isMobileWidth = window.innerWidth <= 992;
+        var isKeypadOrTiny = sw <= 320 && /KaiOS|JioPhone|Opera Mini|UCBrowser/i.test(ua);
         var mem = navigator.deviceMemory;
         var cores = navigator.hardwareConcurrency;
-        var isLowHardware = isMobileWidth && ((mem && mem <= 4) || (cores && cores <= 4));
         var prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        var isDataSaver = navigator.connection && navigator.connection.saveData;
+        var isDataSaver = navigator.connection && navigator.connection.saveData === true;
         var noIO = !('IntersectionObserver' in window);
 
+        // Hardware WebGL GPU Inspection
+        var isWeakGPU = false;
+        var isSoftwareGPU = false;
+        var gpuRenderer = '';
+        try {
+          var c = document.createElement('canvas');
+          var gl = c.getContext('webgl') || c.getContext('experimental-webgl');
+          if (!gl) {
+            isWeakGPU = true;
+          } else {
+            var dbg = gl.getExtension('WEBGL_debug_renderer_info');
+            gpuRenderer = dbg ? (gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) || '') : '';
+            if (/SwiftShader|llvmpipe|Software|Microsoft Basic/i.test(gpuRenderer)) {
+              isWeakGPU = true;
+              isSoftwareGPU = true;
+            } else if (/PowerVR\s*(GE8|SGX|Rogue)|Mali-(400|450|T6|T7|T8|G31)|Adreno.*(2\d\d|3\d\d|4\d\d|50[0-9]|51\d)|Intel.*HD Graphics\s*(2000|2500|3000|4000|400|500)/i.test(gpuRenderer)) {
+              isWeakGPU = true;
+            }
+          }
+        } catch (glErr) {
+          isWeakGPU = false;
+        }
+
+        // Capable Desktop PC check
+        var isCapableDesktop = window.matchMedia && window.matchMedia('(pointer: fine)').matches && sw >= 1024 && (!cores || cores >= 4) && (!mem || mem >= 4) && !isSoftwareGPU;
+
+        // Low hardware permanent criteria
+        var isPermanentLowHardware = !isCapableDesktop && (isWeakGPU || (mem && mem <= 2) || (cores && cores <= 2) || isKeypadOrTiny);
         var tier;
-        if (isKeypadOrTiny || isLowHardware || prefersReducedMotion || isDataSaver || noIO) {
+
+        if (isPermanentLowHardware) {
           tier = 'tier-ultra-lite';
-        } else if (isMobileWidth || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches)) {
+          try {
+            if (!isCapableDesktop && sw < 1024) {
+              localStorage.setItem('nnm_perf_tier_v3', 'tier-ultra-lite');
+            }
+          } catch (e) {}
+        } else if (prefersReducedMotion || isDataSaver || noIO) {
+          tier = 'tier-ultra-lite';
+        } else if ((mem && mem <= 4) || (cores && cores <= 4) || sw <= 992 || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) || /Mali-G(5|6|7)|Adreno.*(61|62)/i.test(gpuRenderer)) {
           tier = 'tier-balanced';
         } else {
           tier = 'tier-full';
         }
+
         document.documentElement.classList.add(tier);
+        document.documentElement.setAttribute('data-perf-tier', tier);
       } catch (e) {
         document.documentElement.classList.add('tier-balanced');
       }
@@ -48,6 +117,13 @@
        RESET & TOKENS
        ========================================================================= */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html.no-theme-transition,
+    html.no-theme-transition *,
+    html.no-theme-transition *::before,
+    html.no-theme-transition *::after {
+      transition: none !important;
+    }
 
     :root {
       --gold:        #D4AF37;
@@ -523,6 +599,7 @@
   </style>
 </head>
 <body>
+  <script>(function(){var t=document.documentElement.getAttribute('data-theme')||'light';document.body.setAttribute('data-theme',t);})();</script>
 
   <!-- Canvas: golden sparkle particles -->
   <canvas id="particles-canvas"></canvas>
@@ -592,6 +669,7 @@
     </div>
     <span class="music-label" id="music-label">&#127925; Music: ON</span>
   </div>
+  <script>(function(){if(document.documentElement.getAttribute('data-music-pref')==='off'){var el=document.getElementById('music-label'),w=document.getElementById('music-widget');if(el)el.innerHTML='&#128263; Music: OFF';if(w){w.classList.remove('playing');w.setAttribute('aria-pressed','false');}}})();</script>
 
   <script>
   'use strict';
@@ -729,8 +807,21 @@
   }
   function lsSet(k, v) { try { localStorage.setItem(k, v); } catch(_) {} }
 
-  // Default Music to ON (isMuted = false) unless explicitly muted by user
-  var isMuted = lsGet('nnm_audio_muted', 'false') === 'true';
+  // Persistent User Preference Engine (nnm_music_pref) - Default is strictly 'on'
+  function getMusicPref() {
+    var pref = lsGet('nnm_music_pref', null);
+    if (pref === 'off' || pref === 'on') return pref;
+    var oldMuted = lsGet('nnm_audio_muted', null);
+    if (oldMuted === 'true') return 'off';
+    return 'on';
+  }
+
+  function setMusicPref(val) {
+    lsSet('nnm_music_pref', val);
+    lsSet('nnm_audio_muted', val === 'off' ? 'true' : 'false');
+    lsSet('nnm_audio_playing', val === 'on' ? 'true' : 'false');
+    document.documentElement.setAttribute('data-music-pref', val);
+  }
 
   audio.volume = TARGET_VOL;
   audio.loop   = true;
@@ -739,6 +830,21 @@
   audio.addEventListener('volumechange', function() {
     if (audio.volume > TARGET_VOL) audio.volume = TARGET_VOL;
   });
+
+  // Update Widget UI directly based on User Preference
+  function updateUI() {
+    var pref = getMusicPref();
+    document.documentElement.setAttribute('data-music-pref', pref);
+    if (pref === 'on') {
+      widget.classList.add('playing');
+      widget.setAttribute('aria-pressed', 'true');
+      if (lbl) lbl.innerHTML = '&#127925; Music: ON';
+    } else {
+      widget.classList.remove('playing');
+      widget.setAttribute('aria-pressed', 'false');
+      if (lbl) lbl.innerHTML = '&#128263; Music: OFF';
+    }
+  }
 
   // ---- One-time safe position restoration (prevents loop seek-traps) ----
   var hasRestoredInitialTime = false;
@@ -788,7 +894,6 @@
       lsSet('nnm_audio_time', cur.toString());
     }
     lastRecordedTime = cur;
-    lsSet('nnm_audio_muted', isMuted ? 'true' : 'false');
   }
 
   audio.addEventListener('timeupdate', audioSaveState);
@@ -801,125 +906,129 @@
     lsSet('nnm_audio_time', '0');
     lastRecordedTime = 0;
     audio.currentTime = 0;
-    if (!isMuted) {
+    if (getMusicPref() === 'on') {
       audio.volume = TARGET_VOL;
+      audio.muted = false;
       var p = audio.play();
       if (p && typeof p.then === 'function') p.catch(function(){});
     }
   });
 
   audio.addEventListener('pause', function() {
-    if (!isMuted && audio.duration && audio.currentTime >= audio.duration - 0.5) {
+    if (getMusicPref() === 'on' && audio.duration && audio.currentTime >= audio.duration - 0.5) {
       audio.currentTime = 0;
       lsSet('nnm_audio_time', '0');
       audio.play().catch(function(){});
     }
   });
 
-  // ---- Widget UI bound to real-time audio state ----
-  function updateUI() {
-    if (audio && !audio.paused && !audio.muted) {
-      widget.classList.add('playing');
-      lbl.innerHTML = '&#127925; Music: ON';
+  // ---- Global Gesture Fallback for Mobile Autoplay Restrictions ----
+  var gestureActive = false;
+  var gestureEvents = ['pointerdown', 'touchstart', 'click', 'keydown'];
+
+  function removeGestureListeners() {
+    if (!gestureActive) return;
+    gestureActive = false;
+    gestureEvents.forEach(function(ev) {
+      window.removeEventListener(ev,   onFirstGesture, true);
+      document.removeEventListener(ev, onFirstGesture, true);
+    });
+  }
+
+  function attachGestureFallback() {
+    if (getMusicPref() !== 'on') return;
+    if (gestureActive) return;
+    gestureActive = true;
+    gestureEvents.forEach(function(ev) {
+      window.addEventListener(ev,   onFirstGesture, { capture: true, passive: true });
+      document.addEventListener(ev, onFirstGesture, { capture: true, passive: true });
+    });
+  }
+
+  function onFirstGesture(e) {
+    if (e && e.target && typeof e.target.closest === 'function' &&
+        e.target.closest('#music-widget')) return;
+    if (getMusicPref() === 'on') {
+      if (!hasRestoredInitialTime) audioRestoreTime();
+      audio.muted = false;
+      audio.volume = TARGET_VOL;
+      var retryP = audio.play();
+      if (retryP && typeof retryP.then === 'function') {
+        retryP.then(function() {
+          removeGestureListeners();
+        }).catch(function(){});
+      }
     } else {
-      widget.classList.remove('playing');
-      lbl.innerHTML = '&#128263; Music: MUTED';
+      removeGestureListeners();
     }
   }
 
-  audio.addEventListener('play',         updateUI);
-  audio.addEventListener('playing',      updateUI);
-  audio.addEventListener('pause',        updateUI);
-  audio.addEventListener('ended',        updateUI);
-  audio.addEventListener('volumechange', updateUI);
+  audio.addEventListener('playing', function() {
+    if (getMusicPref() === 'on') {
+      removeGestureListeners();
+    }
+  });
 
   // ---- Play / Pause ----
   function playAudio() {
-    if (isMuted) { updateUI(); return; }
+    if (getMusicPref() !== 'on') {
+      audio.pause();
+      audio.muted = true;
+      updateUI();
+      return;
+    }
     if (!hasRestoredInitialTime) audioRestoreTime();
     audio.volume = TARGET_VOL;
     audio.muted  = false;
     var p = audio.play();
     if (p && typeof p.then === 'function') {
       p.then(function() {
-        isMuted = false;
-        lsSet('nnm_audio_muted', 'false');
-        lsSet('nnm_audio_playing', 'true');
-        updateUI();
+        removeGestureListeners();
       }).catch(function() {
-        updateUI();
         attachGestureFallback();
       });
-    } else {
-      updateUI();
     }
   }
 
   function pauseAudio() {
     audio.pause();
     audio.muted = true;
-    isMuted = true;
-    lsSet('nnm_audio_muted', 'true');
-    lsSet('nnm_audio_playing', 'false');
+    removeGestureListeners();
     updateUI();
     audioSaveState();
   }
 
-  // ---- Gesture fallback for strict autoplay policies ----
-  var unlockAttached = false;
-  function attachGestureFallback() {
-    if (unlockAttached) return;
-    unlockAttached = true;
-    var evts = ['click','touchstart','pointerdown','scroll','keydown'];
-    function onGesture(e) {
-      if (e && e.target && typeof e.target.closest === 'function' &&
-          e.target.closest('#music-widget')) return;
-      if (!isMuted && (audio.paused || audio.muted)) {
-        if (!hasRestoredInitialTime) audioRestoreTime();
-        audio.volume = TARGET_VOL;
-        audio.muted  = false;
-        var retryP = audio.play();
-        if (retryP && typeof retryP.then === 'function') {
-          retryP.then(function() {
-            isMuted = false;
-            lsSet('nnm_audio_muted','false');
-            lsSet('nnm_audio_playing','true');
-            updateUI();
-          }).catch(function(){});
-        }
-      }
-      evts.forEach(function(ev) {
-        window.removeEventListener(ev,   onGesture, true);
-        document.removeEventListener(ev, onGesture, true);
-      });
-      unlockAttached = false;
-    }
-    evts.forEach(function(ev) {
-      window.addEventListener(ev,   onGesture, { capture: true, passive: true });
-      document.addEventListener(ev, onGesture, { capture: true, passive: true });
-    });
-  }
-
   // ---- Boot ----
   updateUI();
-  playAudio();
-  attachGestureFallback();
+  if (getMusicPref() === 'on') {
+    playAudio();
+  }
 
   // ---- Widget toggle ----
   function toggleMusic(e) {
-    if (e) { e.stopPropagation(); e.preventDefault(); }
-    if (audio.paused || audio.muted) {
-      isMuted = false;
-      lsSet('nnm_audio_muted', 'false');
-      playAudio();
-    } else {
-      isMuted = true;
+    if (e) {
+      e.stopPropagation();
+      if (e.preventDefault) e.preventDefault();
+    }
+    if (getMusicPref() === 'on') {
+      setMusicPref('off');
       pauseAudio();
+    } else {
+      setMusicPref('on');
+      updateUI();
+      playAudio();
     }
   }
   widget.addEventListener('click', toggleMusic);
   widget.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleMusic(e); }
+  });
+
+  // Remove initial-paint transition lock after DOM boot
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      document.documentElement.classList.remove('no-theme-transition');
+    });
   });
   </script>
 
