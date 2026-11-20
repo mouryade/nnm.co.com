@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    NATARAJ NRITYA MANDIR (Code No.: HOW/62) - MULTI-COLOR BUTTON SYSTEM & SPA
    ========================================================================== */
 
@@ -4242,6 +4242,7 @@ img, iframe, canvas, video, svg {
   box-shadow: 0 15px 40px rgba(212, 175, 55, 0.15) !important;
   overflow: hidden;
   transition: transform 0.4s ease, box-shadow 0.4s ease;
+  margin-bottom: 2.5rem;
 }
 
 [data-theme="dark"] .testimonial-spotlight-card {
@@ -5740,21 +5741,175 @@ html {
 }
 
 /* ==========================================================================
-   MOBILE SMOOTHNESS, EXTRA LOGO HIDE & SYMMETRICAL TESTIMONIALS
+   MOBILE TESTIMONIALS ALIGNMENT, EXTRA LOGO HIDE & FULL SYMMETRY
    ========================================================================== */
 @media (max-width: 768px) {
   .about-card-glow .about-extra-logo {
     display: none !important;
   }
 
+  /* Testimonials Section & Container Uniform Alignment */
+  .testimonials-section .container {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* All Three Testimonial Containers - Uniform Width & Alignment */
+  .testimonial-spotlight-card,
   .testimonials-grid,
   .testimonials-grid > .testimonial-card,
+  .testimonials-grid > *,
   .testimonial-card {
     width: 100% !important;
     max-width: 100% !important;
+    min-width: 0 !important;
     margin-left: auto !important;
     margin-right: auto !important;
     box-sizing: border-box !important;
+  }
+
+  /* Container 1: Featured Spotlight Card */
+  .testimonial-spotlight-card {
+    display: block !important;
+    margin-bottom: 1.5rem !important;
+    border-radius: var(--radius-lg, 18px) !important;
+    padding: 1.8rem 1.4rem !important;
+    text-align: center !important;
+  }
+
+  /* Grid wrapper for Containers 2 & 3 */
+  .testimonials-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1.5rem !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+  }
+
+  /* Containers 2 & 3 in Grid */
+  .testimonials-grid > .testimonial-card,
+  .testimonials-grid > *,
+  .testimonial-card {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    flex: 1 1 100% !important;
+    border-radius: var(--radius-lg, 18px) !important;
+    padding: 1.8rem 1.4rem !important;
+  }
+
+  /* Spotlight Badge Perfect Centering on Mobile */
+  .testimonial-spotlight-card .spotlight-badge {
+    display: table !important;
+    margin: 0 auto 1.4rem auto !important;
+  }
+
+  .spotlight-content-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 1.2rem !important;
+    width: 100% !important;
+  }
+
+  .spotlight-avatar-box {
+    margin: 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+
+  .spotlight-avatar-img {
+    margin: 0 auto 0.75rem auto !important;
+  }
+
+  .spotlight-rating {
+    justify-content: center !important;
+    margin: 0 auto !important;
+  }
+
+  .spotlight-text-box {
+    text-align: center !important;
+    width: 100% !important;
+  }
+
+  .spotlight-quote {
+    text-align: center !important;
+    font-size: 1.05rem !important;
+    line-height: 1.75 !important;
+    margin-bottom: 1.2rem !important;
+  }
+
+  .spotlight-author {
+    text-align: center !important;
+    margin-top: 0.8rem !important;
+  }
+
+  .quote-watermark {
+    display: none !important;
+  }
+
+  /* Containers 2 & 3 Internal Fine-Tuning */
+  .card-quote-icon {
+    font-size: 1.6rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .card-rating {
+    margin-bottom: 0.8rem !important;
+  }
+
+  .card-quote {
+    font-size: 0.98rem !important;
+    line-height: 1.75 !important;
+    margin-bottom: 1.2rem !important;
+  }
+
+  .card-profile {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.9rem !important;
+    padding-top: 1rem !important;
+    border-top: 1px solid var(--glass-border) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .testimonial-spotlight-card,
+  .testimonials-grid > .testimonial-card,
+  .testimonial-card {
+    padding: 1.5rem 1.15rem !important;
+    border-radius: 14px !important;
+  }
+
+  .testimonial-spotlight-card {
+    margin-bottom: 1.25rem !important;
+  }
+
+  .testimonials-grid {
+    gap: 1.25rem !important;
+  }
+}
+
+@media (max-width: 359px) {
+  .testimonial-spotlight-card,
+  .testimonials-grid > .testimonial-card,
+  .testimonial-card {
+    padding: 1.2rem 0.85rem !important;
+    border-radius: 12px !important;
+  }
+
+  .testimonial-spotlight-card {
+    margin-bottom: 1rem !important;
+  }
+
+  .testimonials-grid {
+    gap: 1rem !important;
   }
 }
 
@@ -5763,3 +5918,434 @@ html {
 .reveal-item.is-visible {
   will-change: auto !important;
 }
+
+/* ==========================================================================
+   3-TIER ADAPTIVE PERFORMANCE ENGINE (ZERO-LAG HARDWARE ARCHITECTURE)
+   - TIER 1: html.tier-full (Desktop, Laptop, Large Tablet, TV) -> 100% UNTOUCHED
+   - TIER 2: html.tier-balanced (Mid-Range Phones) -> Locked 60fps, No Blur Lag
+   - TIER 3: html.tier-ultra-lite (Budget <= 4GB RAM & JioPhone) -> Zero-Lag Pure Performance
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   TIER 2: BALANCED PROFILE (Mid-Range Phones e.g. Dimensity 6300, 6GB-8GB Phones)
+   - Replaces expensive backdrop-filter with clean semi-opaque frosted backgrounds
+   - Halts CPU-bound border-radius morphing animation on founder cloud frame (keeps static silhouette & glow)
+   - Reduces multi-layered heavy box-shadow spreads to single crisp shadows
+   -------------------------------------------------------------------------- */
+
+/* 1. Backdrop-filter Elimination on Scrolling Cards, Navbar, Sidebar & Bottom Bar */
+html.tier-balanced .site-header,
+html.tier-balanced .mobile-drawer-content,
+html.tier-balanced .mobile-drawer-backdrop,
+html.tier-balanced .mobile-quick-call-bar,
+html.tier-balanced .music-controller-widget,
+html.tier-balanced .course-card,
+html.tier-balanced .stat-box,
+html.tier-balanced .testimonial-card,
+html.tier-balanced .testimonial-spotlight-card,
+html.tier-balanced .highlight-card,
+html.tier-balanced .about-card-glow,
+html.tier-balanced .diploma-roadmap-card,
+html.tier-balanced .form-glass-card,
+html.tier-balanced .summary-card,
+html.tier-balanced .summary-card-premium,
+html.tier-balanced .gallery-photo-overlay,
+html.tier-balanced .courses-badge-pill,
+html.tier-balanced .hero-academy-badge,
+html.tier-balanced .modal-overlay,
+html.tier-balanced .lightbox-modal,
+html.tier-balanced .marquee-container {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Semi-opaque frosted solid background in Light Mode (replaces GPU blur readback seamlessly) */
+html.tier-balanced[data-theme="light"] .site-header,
+html.tier-balanced:not([data-theme="dark"]) .site-header {
+  background: rgba(255, 252, 245, 0.95) !important;
+}
+
+html.tier-balanced[data-theme="light"] .mobile-drawer-content,
+html.tier-balanced:not([data-theme="dark"]) .mobile-drawer-content {
+  background: rgba(255, 252, 245, 0.98) !important;
+}
+
+html.tier-balanced[data-theme="light"] .mobile-quick-call-bar,
+html.tier-balanced:not([data-theme="dark"]) .mobile-quick-call-bar {
+  background: rgba(255, 252, 245, 0.96) !important;
+}
+
+html.tier-balanced[data-theme="light"] .course-card,
+html.tier-balanced:not([data-theme="dark"]) .course-card,
+html.tier-balanced[data-theme="light"] .stat-box,
+html.tier-balanced:not([data-theme="dark"]) .stat-box,
+html.tier-balanced[data-theme="light"] .testimonial-card,
+html.tier-balanced:not([data-theme="dark"]) .testimonial-card,
+html.tier-balanced[data-theme="light"] .testimonial-spotlight-card,
+html.tier-balanced:not([data-theme="dark"]) .testimonial-spotlight-card,
+html.tier-balanced[data-theme="light"] .highlight-card,
+html.tier-balanced:not([data-theme="dark"]) .highlight-card,
+html.tier-balanced[data-theme="light"] .about-card-glow,
+html.tier-balanced:not([data-theme="dark"]) .about-card-glow,
+html.tier-balanced[data-theme="light"] .diploma-roadmap-card,
+html.tier-balanced:not([data-theme="dark"]) .diploma-roadmap-card,
+html.tier-balanced[data-theme="light"] .music-controller-widget,
+html.tier-balanced:not([data-theme="dark"]) .music-controller-widget {
+  background: rgba(255, 252, 245, 0.95) !important;
+}
+
+/* Semi-opaque frosted solid background in Dark Mode */
+html.tier-balanced[data-theme="dark"] .site-header {
+  background: rgba(16, 16, 26, 0.95) !important;
+}
+
+html.tier-balanced[data-theme="dark"] .mobile-drawer-content {
+  background: rgba(16, 16, 26, 0.98) !important;
+}
+
+html.tier-balanced[data-theme="dark"] .mobile-quick-call-bar {
+  background: rgba(16, 16, 26, 0.96) !important;
+}
+
+html.tier-balanced[data-theme="dark"] .course-card,
+html.tier-balanced[data-theme="dark"] .stat-box,
+html.tier-balanced[data-theme="dark"] .testimonial-card,
+html.tier-balanced[data-theme="dark"] .testimonial-spotlight-card,
+html.tier-balanced[data-theme="dark"] .highlight-card,
+html.tier-balanced[data-theme="dark"] .about-card-glow,
+html.tier-balanced[data-theme="dark"] .diploma-roadmap-card,
+html.tier-balanced[data-theme="dark"] .music-controller-widget {
+  background: rgba(16, 16, 26, 0.95) !important;
+}
+
+/* 2. Stop ONLY CPU-bound border-radius morphing while preserving static rounded shape & soft border/glow */
+html.tier-balanced .founder-cloud-frame {
+  animation: none !important;
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40% !important;
+}
+
+html.tier-balanced .founder-cloud-glow-ring {
+  animation: none !important;
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40% !important;
+  filter: blur(16px) !important;
+}
+
+/* 3. Reduce multi-layered heavy box-shadow glows to single crisp shadows */
+html.tier-balanced .course-card,
+html.tier-balanced .stat-box,
+html.tier-balanced .testimonial-card,
+html.tier-balanced .testimonial-spotlight-card,
+html.tier-balanced .highlight-card,
+html.tier-balanced .about-card-glow,
+html.tier-balanced .diploma-roadmap-card,
+html.tier-balanced .founder-cloud-frame {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+}
+
+html.tier-balanced[data-theme="dark"] .course-card,
+html.tier-balanced[data-theme="dark"] .stat-box,
+html.tier-balanced[data-theme="dark"] .testimonial-card,
+html.tier-balanced[data-theme="dark"] .testimonial-spotlight-card,
+html.tier-balanced[data-theme="dark"] .highlight-card,
+html.tier-balanced[data-theme="dark"] .about-card-glow,
+html.tier-balanced[data-theme="dark"] .diploma-roadmap-card,
+html.tier-balanced[data-theme="dark"] .founder-cloud-frame {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* --------------------------------------------------------------------------
+   TIER 3: ULTRA-LITE PROFILE (Budget 2GB-4GB Phones e.g. Vivo Y91i & JioPhone/KaiOS)
+   - Guaranteed zero GPU tile exhaustion, zero white blanks, zero text ghosting
+   - Canvas fully hidden and detached from rendering tree
+   - Global backdrop-filter & heavy filters completely disabled
+   - All continuous CPU/GPU animations disabled
+   - Scroll reveals rendered instantly without delay or blank states
+   - Simple flat 2D slide drawer transition
+   -------------------------------------------------------------------------- */
+
+/* 1. Completely hide canvas layers */
+html.tier-ultra-lite #cosmic-canvas,
+html.tier-ultra-lite #particles-canvas {
+  display: none !important;
+}
+
+/* 2. Strip ALL GPU-heavy effects globally */
+html.tier-ultra-lite *,
+html.tier-ultra-lite *::before,
+html.tier-ultra-lite *::after {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Strip blur filters from decorative elements and glow rings */
+html.tier-ultra-lite .founder-cloud-glow-ring,
+html.tier-ultra-lite .founder-cloud-frame,
+html.tier-ultra-lite .glow-ring,
+html.tier-ultra-lite .logo-glow-wrapper::before,
+html.tier-ultra-lite .hero-glow-blob,
+html.tier-ultra-lite .radial-glow {
+  filter: none !important;
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+/* Disable infinite / morphing / floating CSS animations & replace heavy shadows with 1px border */
+html.tier-ultra-lite .founder-cloud-frame,
+html.tier-ultra-lite .founder-cloud-glow-ring,
+html.tier-ultra-lite .floating-hero-card,
+html.tier-ultra-lite .pulse-dot,
+html.tier-ultra-lite .eq-bar,
+html.tier-ultra-lite .music-controller-widget.playing .eq-bar,
+html.tier-ultra-lite .equalizer-bars .eq-bar {
+  animation: none !important;
+}
+
+html.tier-ultra-lite .founder-cloud-frame {
+  border-radius: 24px !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15) !important;
+}
+
+html.tier-ultra-lite .founder-cloud-glow-ring {
+  display: none !important;
+}
+
+/* Clean solid card backgrounds + crisp 1px borders matching Light / Dark themes */
+html.tier-ultra-lite[data-theme="light"] .course-card,
+html.tier-ultra-lite:not([data-theme="dark"]) .course-card,
+html.tier-ultra-lite[data-theme="light"] .stat-box,
+html.tier-ultra-lite:not([data-theme="dark"]) .stat-box,
+html.tier-ultra-lite[data-theme="light"] .testimonial-card,
+html.tier-ultra-lite:not([data-theme="dark"]) .testimonial-card,
+html.tier-ultra-lite[data-theme="light"] .testimonial-spotlight-card,
+html.tier-ultra-lite:not([data-theme="dark"]) .testimonial-spotlight-card,
+html.tier-ultra-lite[data-theme="light"] .highlight-card,
+html.tier-ultra-lite:not([data-theme="dark"]) .highlight-card,
+html.tier-ultra-lite[data-theme="light"] .about-card-glow,
+html.tier-ultra-lite:not([data-theme="dark"]) .about-card-glow,
+html.tier-ultra-lite[data-theme="light"] .diploma-roadmap-card,
+html.tier-ultra-lite:not([data-theme="dark"]) .diploma-roadmap-card,
+html.tier-ultra-lite[data-theme="light"] .form-glass-card,
+html.tier-ultra-lite:not([data-theme="dark"]) .form-glass-card,
+html.tier-ultra-lite[data-theme="light"] .summary-card,
+html.tier-ultra-lite:not([data-theme="dark"]) .summary-card,
+html.tier-ultra-lite[data-theme="light"] .music-controller-widget,
+html.tier-ultra-lite:not([data-theme="dark"]) .music-controller-widget,
+html.tier-ultra-lite[data-theme="light"] .site-header,
+html.tier-ultra-lite:not([data-theme="dark"]) .site-header,
+html.tier-ultra-lite[data-theme="light"] .mobile-drawer-content,
+html.tier-ultra-lite:not([data-theme="dark"]) .mobile-drawer-content,
+html.tier-ultra-lite[data-theme="light"] .mobile-quick-call-bar,
+html.tier-ultra-lite:not([data-theme="dark"]) .mobile-quick-call-bar {
+  background: #FAF8F5 !important;
+  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+}
+
+html.tier-ultra-lite[data-theme="dark"] .course-card,
+html.tier-ultra-lite[data-theme="dark"] .stat-box,
+html.tier-ultra-lite[data-theme="dark"] .testimonial-card,
+html.tier-ultra-lite[data-theme="dark"] .testimonial-spotlight-card,
+html.tier-ultra-lite[data-theme="dark"] .highlight-card,
+html.tier-ultra-lite[data-theme="dark"] .about-card-glow,
+html.tier-ultra-lite[data-theme="dark"] .diploma-roadmap-card,
+html.tier-ultra-lite[data-theme="dark"] .form-glass-card,
+html.tier-ultra-lite[data-theme="dark"] .summary-card,
+html.tier-ultra-lite[data-theme="dark"] .music-controller-widget,
+html.tier-ultra-lite[data-theme="dark"] .site-header,
+html.tier-ultra-lite[data-theme="dark"] .mobile-drawer-content,
+html.tier-ultra-lite[data-theme="dark"] .mobile-quick-call-bar {
+  background: #0E0C1B !important;
+  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* 3. Force instant visibility for scroll-reveal items (eliminates blank white tiles while scrolling) */
+html.tier-ultra-lite .scroll-reveal,
+html.tier-ultra-lite .reveal-item,
+html.tier-ultra-lite .scroll-reveal:not(.revealed),
+html.tier-ultra-lite .page-view.active .scroll-reveal:not(.revealed),
+html.tier-ultra-lite .performance-gallery-grid .scroll-reveal,
+html.tier-ultra-lite .courses-grid .scroll-reveal,
+html.tier-ultra-lite .testimonials-grid .scroll-reveal,
+html.tier-ultra-lite .stats-grid .scroll-reveal,
+html.tier-ultra-lite .highlights-grid .scroll-reveal {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+  transition-delay: 0s !important;
+  will-change: auto !important;
+}
+
+/* 4. Disable any 3D transforms/perspective on sidebar or cards; flat translateX transition */
+html.tier-ultra-lite .course-card,
+html.tier-ultra-lite .about-card-glow,
+html.tier-ultra-lite .highlight-card,
+html.tier-ultra-lite .testimonial-card,
+html.tier-ultra-lite .stat-box,
+html.tier-ultra-lite .diploma-roadmap-card {
+  perspective: none !important;
+  transform-style: flat !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+html.tier-ultra-lite .mobile-drawer-overlay {
+  perspective: none !important;
+}
+
+html.tier-ultra-lite .mobile-drawer-backdrop {
+  background: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html.tier-ultra-lite .mobile-drawer-content {
+  transform: translateX(100%) !important;
+  transition: transform 0.25s ease-out !important;
+  perspective: none !important;
+}
+
+html.tier-ultra-lite .mobile-drawer-overlay.open .mobile-drawer-content {
+  transform: translateX(0) !important;
+}
+
+html.tier-ultra-lite .mobile-drawer-link {
+  transition: none !important;
+  transition-delay: 0s !important;
+  transform: none !important;
+  opacity: 1 !important;
+}
+
+/* --------------------------------------------------------------------------
+   5. JIOPHONE & TINY KEYPAD SCREEN ADAPTIVE RULES (240px - 320px)
+   - Targets @media (max-width: 340px), (max-height: 400px)
+   - Prevents fixed headers/footers/music pills from consuming screen real estate
+   - Single clean column layout
+   - Safe overflow-x: hidden ONLY on main & section wrappers (NEVER on html/body)
+   -------------------------------------------------------------------------- */
+@media (max-width: 340px), (max-height: 400px) {
+  /* Refinement 3: Safe overflow-x strictly on main/sections, never html/body to prevent double scrollbars */
+  main,
+  .page-view,
+  .app-main-content,
+  section {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+
+  /* Compact Site Header */
+  .site-header {
+    padding: 4px 8px !important;
+    min-height: 48px !important;
+  }
+
+  .nav-container {
+    padding: 0 4px !important;
+    gap: 6px !important;
+  }
+
+  .nav-brand img {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .brand-name {
+    font-size: 0.88rem !important;
+    line-height: 1.15 !important;
+  }
+
+  .brand-sub {
+    font-size: 0.62rem !important;
+  }
+
+  .nav-toggle-btn {
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 0.95rem !important;
+  }
+
+  /* Compact Bottom Quick Call Bar: Minimal height, compact buttons */
+  .mobile-quick-call-bar {
+    position: static !important;
+    width: 100% !important;
+    padding: 6px 4px !important;
+    box-shadow: none !important;
+    border-top: 1px solid var(--neon-gold) !important;
+  }
+
+  .mobile-bar-container {
+    gap: 6px !important;
+    padding: 0 4px !important;
+    justify-content: space-around !important;
+  }
+
+  .mbar-btn {
+    padding: 4px 6px !important;
+    font-size: 0.72rem !important;
+  }
+
+  .mbar-btn i {
+    font-size: 0.85rem !important;
+  }
+
+  /* Compact Floating Music Controller Pill */
+  .music-controller-widget {
+    bottom: 8px !important;
+    right: 8px !important;
+    padding: 4px 8px !important;
+    font-size: 0.7rem !important;
+  }
+
+  .music-label {
+    font-size: 0.68rem !important;
+  }
+
+  /* Compact Typography for Headings on Tiny Keypad Viewports */
+  h1, .hero-title {
+    font-size: 1.35rem !important;
+    line-height: 1.25 !important;
+  }
+
+  h2, .section-title {
+    font-size: 1.2rem !important;
+    line-height: 1.25 !important;
+  }
+
+  h3 {
+    font-size: 1.05rem !important;
+  }
+
+  p, .hero-subtitle {
+    font-size: 0.84rem !important;
+    line-height: 1.45 !important;
+  }
+
+  /* Force Clean Single-Column Grid Stacking */
+  .courses-grid,
+  .stats-grid,
+  .highlights-grid,
+  .testimonials-grid,
+  .performance-gallery-grid,
+  .contact-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .course-card,
+  .stat-box,
+  .testimonial-card,
+  .highlight-card,
+  .about-card-glow {
+    padding: 12px 10px !important;
+    border-radius: 10px !important;
+  }
+
+  .founder-cloud-wrapper {
+    max-width: 220px !important;
+  }
+
+  .founder-cloud-img {
+    max-height: 260px !important;
+  }
+}
+
