@@ -3138,6 +3138,29 @@ html[data-theme="dark"] .music-controller-widget {
   100% { height: 12px; }
 }
 
+@keyframes tapPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 15px var(--gold-glow);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px var(--pink-glow);
+  }
+}
+
+.music-controller-widget.music-waiting-tap,
+.music-widget.music-waiting-tap {
+  animation: tapPulse 1.8s infinite ease-in-out !important;
+  border-color: var(--neon-pink) !important;
+}
+
+html.tier-ultra-lite .music-controller-widget.music-waiting-tap,
+html.tier-ultra-lite .music-widget.music-waiting-tap {
+  animation: none !important;
+  border-color: var(--neon-gold) !important;
+}
+
 .music-label {
   font-family: var(--font-tech);
   font-size: 0.75rem;
