@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Nataraj Nritya Mandir (Code No.: HOW/62) - Affiliated to Purbi Sangeet-O-Kala Kendra (Regn No. S/81662). Premier Kathak, Rabindra Nritya & Creative Dance Academy in Howrah. Direct Online Admissions.">
-  <title>Nataraj Nritya Mandir (HOW/62) | Premier Indian Dance Academy</title>
+  <title>Nataraj Nritya Mandir</title>
   
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -36,6 +36,41 @@
   <link rel="preload" as="image" href="assets/Gallery/thumbs/Pic. 6.webp">
   <link rel="preload" as="image" href="assets/Gallery/thumbs/Pic. 7.webp">
   <link rel="preload" as="image" href="assets/Gallery/thumbs/Pic. 8.webp">
+
+  <!-- 3-Tier Adaptive Performance Pre-Paint Detection Engine (Zero-Jank Hardware Scaler) -->
+  <script>
+    (function() {
+      try {
+        var cached = sessionStorage.getItem('nnm_perf_tier');
+        if (cached === 'tier-ultra-lite') {
+          document.documentElement.classList.add('tier-ultra-lite');
+          return;
+        }
+        var sw = (window.screen && window.screen.width) ? window.screen.width : window.innerWidth;
+        var ua = navigator.userAgent || '';
+        var isKeypadOrTiny = sw <= 320 || /KaiOS|JioPhone|Opera Mini|UCBrowser/i.test(ua);
+        var isMobileWidth = window.innerWidth <= 992;
+        var mem = navigator.deviceMemory;
+        var cores = navigator.hardwareConcurrency;
+        var isLowHardware = isMobileWidth && ((mem && mem <= 4) || (cores && cores <= 4));
+        var prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var isDataSaver = navigator.connection && navigator.connection.saveData;
+        var noIO = !('IntersectionObserver' in window);
+
+        var tier;
+        if (isKeypadOrTiny || isLowHardware || prefersReducedMotion || isDataSaver || noIO) {
+          tier = 'tier-ultra-lite';
+        } else if (isMobileWidth || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches)) {
+          tier = 'tier-balanced';
+        } else {
+          tier = 'tier-full';
+        }
+        document.documentElement.classList.add(tier);
+      } catch (e) {
+        document.documentElement.classList.add('tier-balanced');
+      }
+    })();
+  </script>
 
   <!-- Custom Style Sheet -->
   <link rel="stylesheet" href="style.css">
@@ -937,18 +972,17 @@
     <section class="testimonials-section">
       <div class="container">
         <div class="section-header stagger-item">
-          <br>
           <span class="section-subtitle">Scholars Voices</span>
           <h2 class="section-title">Artistic Testimonials</h2>
           <p class="section-description">Reflections and reviews from scholars, stage performers, and parents at <strong>Nataraj Nritya Mandir (Code No.: HOW/62)</strong>, affiliated with Purbi Sangeet-O-Kala Kendra (S/81662).</p>
         </div>
 
         <!-- Featured Spotlight Top Testimonial Card -->
-        <div class="testimonial-spotlight-card stagger-item" style="margin-bottom: 3.5rem;">
+        <div class="testimonial-spotlight-card stagger-item">
           <div class="spotlight-badge"><i class="fa-solid fa-crown text-gold"></i> Featured Senior Scholar</div>
           <div class="spotlight-content-grid">
             <div class="spotlight-avatar-box">
-              <img src="assets/Testimonial/Kalyan Bakshi.webp" alt="Sreemoyee Mukherjee" class="spotlight-avatar-img" loading="lazy" decoding="async">
+              <img src="assets/Testimonial/Kalyan Bakshi.webp" alt="Kalyan Bakshi" class="spotlight-avatar-img" loading="lazy" decoding="async">
               <div class="spotlight-rating">
                 <i class="fa-solid fa-star"></i>
                 <i class="fa-solid fa-star"></i>
@@ -1027,7 +1061,6 @@
               </div>
             </div>
           </div>
-          <br>
         </div>
       </div>
     </section>
