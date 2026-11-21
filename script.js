@@ -1895,10 +1895,11 @@ function initAdmissionSystem() {
           console.warn('QR Code generation notice:', qrErr);
         }
 
-        // Display Glowing Success Voucher Modal
+        // Display Glowing Success Voucher Modal & Lock Background Scroll
         const confirmModal = document.getElementById('confirmation-modal');
         if (confirmModal) {
           confirmModal.classList.add('active');
+          document.body.style.overflow = 'hidden';
         }
 
         // Mark fresh form submission verified & clear any previous return flag
@@ -1943,11 +1944,26 @@ function initAdmissionSystem() {
     });
   }
 
-  const confirmModal = document.getElementById('confirmation-modal');
-  const closeBtn = confirmModal ? confirmModal.querySelector('.modal-close-btn') : null;
-  if (closeBtn && confirmModal) {
-    closeBtn.addEventListener('click', () => {
+  window.closeConfirmationModal = function() {
+    const confirmModal = document.getElementById('confirmation-modal');
+    if (confirmModal) {
       confirmModal.classList.remove('active');
+    }
+    document.body.style.overflow = '';
+  };
+
+  const confirmModal = document.getElementById('confirmation-modal');
+  if (confirmModal) {
+    const closeBtn = confirmModal.querySelector('.modal-close-btn');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        window.closeConfirmationModal();
+      });
+    }
+    confirmModal.addEventListener('click', (e) => {
+      if (e.target === confirmModal) {
+        window.closeConfirmationModal();
+      }
     });
   }
 }
@@ -1966,8 +1982,11 @@ function renderRealScanableQRCode(regId, name, guardian, dob, age, phone, email,
   const qrImg = document.createElement('img');
   qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrDataText)}`;
   qrImg.alt = `Official Registration QR Code - ${regId}`;
-  qrImg.style.width = '130px';
-  qrImg.style.height = '130px';
+  qrImg.className = 'receipt-qr-img';
+  qrImg.style.width = '100%';
+  qrImg.style.height = '100%';
+  qrImg.style.maxWidth = '128px';
+  qrImg.style.maxHeight = '128px';
   qrImg.style.borderRadius = '8px';
   qrImg.style.display = 'block';
   qrImg.style.cursor = 'pointer';
