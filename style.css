@@ -3778,7 +3778,7 @@ html.tier-ultra-lite .music-widget.music-waiting-tap {
   inset: 0;
   background: rgba(13, 27, 42, 0.82);
   backdrop-filter: blur(16px);
-  z-index: 2000;
+  z-index: 100000 !important;
   display: none !important;
   visibility: hidden !important;
   align-items: center;
@@ -4722,11 +4722,48 @@ img, iframe, canvas, video, svg {
   #confirmation-modal .voucher-next-steps,
   #confirmation-modal button,
   #confirmation-modal [onclick],
+  #confirmation-modal .voucher-actions,
+  #confirmation-modal .confirmation-success-icon,
+  #confirmation-modal .confirmation-modal-title,
+  #confirmation-modal .confirmation-modal-subtitle,
   #confirmation-modal .modal-box > h2,
   #confirmation-modal .modal-box > p,
   #confirmation-modal .modal-box > div:first-of-type {
     display: none !important;
     visibility: hidden !important;
+  }
+
+  /* STEP 6b: Enforce crisp 2-column horizontal voucher on paper */
+  #confirmation-modal .voucher-header {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    text-align: left !important;
+  }
+
+  #confirmation-modal .voucher-header-brand {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    text-align: left !important;
+  }
+
+  #confirmation-modal .voucher-header-text,
+  #confirmation-modal .voucher-title,
+  #confirmation-modal .voucher-subtitle,
+  #confirmation-modal .voucher-code-line {
+    text-align: left !important;
+  }
+
+  #confirmation-modal .voucher-body-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 140px !important;
+    gap: 1.5rem !important;
+  }
+
+  #confirmation-modal .voucher-details-col {
+    text-align: left !important;
   }
 
   /* STEP 7: Force single page print */
@@ -6836,4 +6873,593 @@ html.tier-ultra-lite .mobile-drawer-link {
     max-height: 260px !important;
   }
 }
+
+/* ==========================================================================
+   17. UNIVERSAL RESPONSIVE ADMISSION CONFIRMATION MODAL & ENROLLMENT VOUCHER
+   ========================================================================== */
+
+/* Top-Most Stacking & Clean Viewport Containment */
+#confirmation-modal.modal-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  height: 100vh !important;
+  background: rgba(8, 6, 26, 0.86) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  z-index: 100000 !important;
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  padding: 14px !important;
+  box-sizing: border-box !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+#confirmation-modal.modal-backdrop.active {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+#confirmation-modal .modal-box,
+#confirmation-modal .confirmation-modal-box {
+  background: var(--modal-bg) !important;
+  border: 1.5px solid var(--neon-gold) !important;
+  border-radius: var(--radius-lg) !important;
+  width: min(94vw, 720px) !important;
+  max-width: 100% !important;
+  max-height: 92dvh !important;
+  max-height: 92vh !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  position: relative !important;
+  padding: 2.4rem 2rem 2.4rem 2rem !important;
+  box-sizing: border-box !important;
+  box-shadow: 0 0 60px var(--gold-glow), 0 25px 60px rgba(0, 0, 0, 0.6) !important;
+  margin: auto !important;
+  text-align: center !important;
+  transform: scale(0.92);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+#confirmation-modal.active .modal-box {
+  transform: scale(1) !important;
+}
+
+/* Modal Close Button */
+#confirmation-modal .modal-close-btn {
+  position: absolute !important;
+  top: 14px !important;
+  right: 14px !important;
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 50% !important;
+  background: rgba(233, 30, 99, 0.12) !important;
+  border: 1.5px solid var(--neon-pink) !important;
+  color: var(--neon-pink) !important;
+  font-size: 1.25rem !important;
+  line-height: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  z-index: 20 !important;
+  transition: all 0.25s ease !important;
+}
+
+#confirmation-modal .modal-close-btn:hover {
+  background: var(--neon-pink) !important;
+  color: #FFFFFF !important;
+  transform: rotate(90deg) scale(1.08) !important;
+}
+
+/* Success Header Content */
+.confirmation-success-icon {
+  font-size: 3.5rem;
+  color: var(--neon-gold);
+  margin-bottom: 0.6rem;
+  line-height: 1;
+}
+
+.confirmation-modal-title {
+  font-size: clamp(1.35rem, 4vw, 1.75rem);
+  margin-bottom: 0.4rem;
+  line-height: 1.25;
+}
+
+.confirmation-modal-subtitle {
+  color: var(--text-sub);
+  margin-bottom: 1.2rem;
+  font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+  line-height: 1.5;
+}
+
+/* Receipt Card / Voucher Area */
+#confirmation-modal .receipt-card {
+  position: relative !important;
+  overflow: hidden !important;
+  background: var(--bg-surface-2) !important;
+  border: 2px dashed var(--neon-gold) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 1.8rem 1.6rem !important;
+  margin: 1.2rem 0 !important;
+  box-sizing: border-box !important;
+}
+
+.voucher-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.06;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.voucher-watermark img {
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  filter: grayscale(100%);
+}
+
+.voucher-content-relative {
+  position: relative;
+  z-index: 1;
+}
+
+/* Base Desktop Voucher Header */
+.voucher-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--neon-gold);
+  padding-bottom: 1rem;
+  margin-bottom: 1.2rem;
+  gap: 12px;
+}
+
+.voucher-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+
+.voucher-header-logo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 1.5px solid var(--neon-gold);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.voucher-header-text {
+  text-align: left;
+}
+
+.voucher-title {
+  font-weight: 900;
+  color: var(--text-main);
+  font-size: 1.25rem;
+  display: block;
+  font-family: var(--font-royal);
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.voucher-subtitle {
+  font-weight: 800;
+  color: var(--neon-gold-bright);
+  font-size: 1rem;
+  display: block;
+  margin-top: 2px;
+  letter-spacing: 0.5px;
+}
+
+.voucher-code-line {
+  color: var(--text-sub);
+  font-size: 0.8rem;
+  font-family: var(--font-tech);
+  display: block;
+  margin-top: 2px;
+}
+
+.voucher-reg-badge {
+  color: var(--neon-pink);
+  font-weight: 800;
+  font-family: var(--font-tech);
+  font-size: 1.05rem;
+  background: rgba(233, 30, 99, 0.08);
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(233, 30, 99, 0.25);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Base Desktop Voucher Body Grid */
+.voucher-body-grid {
+  display: grid;
+  grid-template-columns: 1fr 148px;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.voucher-details-col {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 0.9rem;
+}
+
+.voucher-detail-row {
+  line-height: 1.45;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.voucher-label {
+  color: var(--text-sub);
+}
+
+.voucher-val-student {
+  color: var(--neon-gold-bright);
+}
+
+.voucher-val-main {
+  color: var(--text-main);
+}
+
+.voucher-val-highlight {
+  color: var(--neon-pink);
+}
+
+.voucher-val-gold {
+  color: var(--neon-gold);
+}
+
+/* QR Code Block */
+.voucher-qr-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#receipt-qr-box {
+  background: #ffffff;
+  padding: 10px;
+  border-radius: 12px;
+  border: 2px solid var(--neon-gold);
+  box-shadow: 0 0 20px var(--gold-glow);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 148px;
+  height: 148px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+#receipt-qr-box img,
+#receipt-qr-box canvas {
+  width: 128px !important;
+  height: 128px !important;
+  max-width: 100% !important;
+  height: auto !important;
+  display: block !important;
+}
+
+.voucher-qr-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--neon-gold-bright);
+  margin-top: 8px;
+  letter-spacing: 1.2px;
+  text-align: center;
+  display: block;
+  white-space: nowrap;
+}
+
+/* Bottom Action Buttons */
+.voucher-actions {
+  display: flex;
+  gap: 1.2rem;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1.4rem;
+  width: 100%;
+}
+
+/* Tablet Refinements (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  #confirmation-modal .modal-box {
+    width: min(90vw, 720px) !important;
+    padding: 2.2rem 1.8rem 2.4rem 1.8rem !important;
+  }
+
+  .voucher-body-grid {
+    grid-template-columns: 1fr 140px !important;
+    gap: 1.2rem !important;
+  }
+}
+
+/* Mobile & Phablet Views (<= 768px) */
+@media (max-width: 768px) {
+  #confirmation-modal.modal-backdrop {
+    padding: 12px !important;
+  }
+
+  #confirmation-modal .modal-box {
+    width: min(95vw, 600px) !important;
+    padding: 2rem 1.2rem 2.2rem 1.2rem !important;
+    max-height: 90dvh !important;
+  }
+
+  #confirmation-modal .receipt-card {
+    padding: 1.4rem 1rem !important;
+  }
+
+  /* Vertical Header Stacking: Logo Top, Titles Center, Pink Badge Center */
+  .voucher-header {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 10px !important;
+    padding-bottom: 1rem !important;
+    margin-bottom: 1.2rem !important;
+  }
+
+  .voucher-header-brand {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .voucher-header-logo {
+    width: 56px !important;
+    height: 56px !important;
+    margin: 0 auto !important;
+  }
+
+  .voucher-header-text {
+    text-align: center !important;
+    width: 100% !important;
+  }
+
+  .voucher-title {
+    font-size: clamp(1.1rem, 4vw, 1.25rem) !important;
+    text-align: center !important;
+  }
+
+  .voucher-subtitle {
+    font-size: clamp(0.9rem, 3.2vw, 1rem) !important;
+    text-align: center !important;
+  }
+
+  .voucher-code-line {
+    font-size: clamp(0.72rem, 2.6vw, 0.8rem) !important;
+    text-align: center !important;
+  }
+
+  .voucher-reg-badge {
+    display: inline-block !important;
+    margin: 2px auto 0 !important;
+    font-size: clamp(0.9rem, 3.2vw, 1rem) !important;
+    white-space: nowrap !important;
+    max-width: 100% !important;
+  }
+
+  /* Single Column Voucher Body */
+  .voucher-body-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    width: 100% !important;
+  }
+
+  .voucher-details-col {
+    width: 100% !important;
+    text-align: left !important;
+    gap: 8px !important;
+  }
+
+  .voucher-detail-row {
+    font-size: 0.88rem !important;
+    width: 100% !important;
+  }
+
+  /* Centered QR Block Below Details */
+  .voucher-qr-col {
+    width: 100% !important;
+    margin: 4px auto 0 !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  #receipt-qr-box {
+    width: 148px !important;
+    height: 148px !important;
+    padding: 10px !important;
+  }
+
+  #receipt-qr-box img,
+  #receipt-qr-box canvas {
+    width: 128px !important;
+    height: 128px !important;
+    max-width: 100% !important;
+  }
+
+  .voucher-qr-label {
+    margin-top: 8px !important;
+    letter-spacing: 1.5px !important;
+  }
+}
+
+/* Mobile Screens (<= 600px) */
+@media (max-width: 600px) {
+  .voucher-next-steps {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.6rem !important;
+    padding: 14px !important;
+    margin: 1.2rem 0 !important;
+  }
+
+  .voucher-next-steps-icon {
+    font-size: 1.6rem !important;
+    margin-top: 0 !important;
+  }
+
+  .voucher-next-steps-title {
+    font-size: 0.95rem !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .voucher-next-steps-text {
+    font-size: 0.86rem !important;
+    line-height: 1.55 !important;
+  }
+}
+
+/* Compact Mobile (<= 480px) */
+@media (max-width: 480px) {
+  #confirmation-modal.modal-backdrop {
+    padding: 10px !important;
+  }
+
+  #confirmation-modal .modal-box {
+    padding: 1.8rem 1rem 2.2rem 1rem !important;
+    border-radius: var(--radius-md) !important;
+    width: 96% !important;
+  }
+
+  .voucher-actions {
+    flex-direction: column !important;
+    gap: 10px !important;
+    width: 100% !important;
+    margin-top: 1.2rem !important;
+  }
+
+  .voucher-actions .btn-futuristic {
+    width: 100% !important;
+    min-height: 46px !important;
+    justify-content: center !important;
+    padding: 0.85rem 1.2rem !important;
+    font-size: 0.9rem !important;
+  }
+}
+
+/* JioPhone, KaiOS & Ultra-Compact Screens (<= 340px) */
+@media (max-width: 340px) {
+  #confirmation-modal.modal-backdrop {
+    padding: 6px !important;
+  }
+
+  #confirmation-modal .modal-box {
+    padding: 14px 8px 24px 8px !important;
+    width: 100% !important;
+    border-radius: 12px !important;
+    overflow-x: hidden !important;
+  }
+
+  #confirmation-modal .receipt-card {
+    padding: 10px 8px !important;
+    margin: 0.8rem 0 !important;
+    border-radius: 8px !important;
+    overflow-x: hidden !important;
+  }
+
+  .confirmation-success-icon {
+    font-size: 2.6rem !important;
+  }
+
+  .confirmation-modal-title {
+    font-size: 1.15rem !important;
+  }
+
+  .confirmation-modal-subtitle {
+    font-size: 0.78rem !important;
+    margin-bottom: 0.8rem !important;
+  }
+
+  .voucher-title {
+    font-size: 0.95rem !important;
+  }
+
+  .voucher-subtitle {
+    font-size: 0.78rem !important;
+  }
+
+  .voucher-code-line {
+    font-size: 0.65rem !important;
+  }
+
+  .voucher-reg-badge {
+    font-size: 0.78rem !important;
+    padding: 4px 8px !important;
+  }
+
+  .voucher-detail-row {
+    font-size: 0.8rem !important;
+    line-height: 1.35 !important;
+  }
+
+  #receipt-qr-box {
+    width: 116px !important;
+    height: 116px !important;
+    padding: 6px !important;
+  }
+
+  #receipt-qr-box img,
+  #receipt-qr-box canvas {
+    width: 104px !important;
+    height: 104px !important;
+    max-width: 100% !important;
+  }
+
+  .voucher-qr-label {
+    font-size: 0.7rem !important;
+    letter-spacing: 1px !important;
+  }
+
+  .voucher-next-steps {
+    padding: 10px !important;
+  }
+
+  .voucher-next-steps-title {
+    font-size: 0.82rem !important;
+  }
+
+  .voucher-next-steps-text {
+    font-size: 0.75rem !important;
+    line-height: 1.45 !important;
+  }
+
+  .voucher-actions .btn-futuristic {
+    font-size: 0.82rem !important;
+    min-height: 42px !important;
+    padding: 0.7rem 0.8rem !important;
+  }
+}
+
 
