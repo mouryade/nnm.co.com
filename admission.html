@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Official admission application verification for Nataraj Nritya Mandir (Est. 1990), Howrah.">
   <title>Nataraj Nritya Mandir</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -142,17 +143,21 @@
     }
 
     /* =========================================================================
-       HTML / BODY — NO JITTER
+       HTML / BODY — CLEAN SCROLLABLE CONTAINER (NO TOP-CLIPPING)
        ========================================================================= */
-    html { height: 100%; overflow: hidden; }
+    html {
+      min-height: 100dvh;
+      height: auto;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
 
     body {
-      height: 100%;
+      min-height: 100dvh;
+      height: auto;
       width: 100%;
-      overflow: hidden;           /* Prevents scroll-jitter completely */
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      overflow-x: hidden;
+      overflow-y: auto;
       font-family: var(--font-mod);
       background: #04030F;
       position: relative;
@@ -211,23 +216,23 @@
     }
 
     /* =========================================================================
-       PAGE WRAPPER — centers card; allows internal scroll on very short screens
+       PAGE WRAPPER — Flex column centering with bottom clearance for music pill
        ========================================================================= */
     .page-wrapper {
       position: relative;
       z-index: 10;
       width: 100%;
-      height: 100%;
+      min-height: 100dvh;
+      height: auto;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 20px 16px;
-      overflow-y: auto;
-      overflow-x: hidden;
+      justify-content: flex-start;
+      padding: clamp(24px, 4vh, 36px) 16px 88px;
+      overflow: visible;
+      box-sizing: border-box;
       -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
     }
-    .page-wrapper::-webkit-scrollbar { display: none; }
 
     /* =========================================================================
        SUCCESS CARD
@@ -237,10 +242,12 @@
       background: var(--card-bg);
       border: 1.5px solid var(--card-border);
       border-radius: var(--r-card);
-      padding: clamp(28px, 6vw, 52px) clamp(24px, 7vw, 56px);
+      padding: clamp(22px, 4vw, 36px) clamp(20px, 5vw, 44px);
       max-width: 640px;
       width: 100%;
       text-align: center;
+      margin: auto 0;
+      box-sizing: border-box;
       backdrop-filter: blur(28px) saturate(1.5);
       -webkit-backdrop-filter: blur(28px) saturate(1.5);
       box-shadow:
@@ -293,8 +300,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: clamp(20px, 6vw, 42px);
-      margin-bottom: clamp(18px, 4vw, 28px);
+      gap: clamp(16px, 4vw, 36px);
+      margin-bottom: clamp(14px, 2.5vw, 22px);
       animation: fadeUp 0.7s ease 0.35s both;
     }
 
@@ -307,8 +314,8 @@
     }
 
     .logo-circle {
-      width:  clamp(82px, 18vw, 110px);
-      height: clamp(82px, 18vw, 110px);
+      width:  clamp(74px, 15vw, 98px);
+      height: clamp(74px, 15vw, 98px);
       border: 2.5px solid var(--gold);
       box-shadow: 0 0 20px rgba(212,175,55,0.5), 0 4px 18px rgba(0,0,0,0.5);
       background: #111;
@@ -319,8 +326,8 @@
     }
 
     .founder-img {
-      width:  clamp(84px, 18.5vw, 114px);
-      height: clamp(84px, 18.5vw, 114px);
+      width:  clamp(76px, 15.5vw, 102px);
+      height: clamp(76px, 15.5vw, 102px);
       border: 3px solid var(--emerald);
       box-shadow: 0 0 24px var(--em-glow), 0 4px 18px rgba(0,0,0,0.5);
       object-position: top;
@@ -332,9 +339,9 @@
        SUCCESS ICON
        ========================================================================= */
     .checkmark-wrap {
-      margin: 0 auto clamp(12px, 3vw, 18px);
-      width:  clamp(64px, 14vw, 84px);
-      height: clamp(64px, 14vw, 84px);
+      margin: 0 auto clamp(10px, 2vw, 14px);
+      width:  clamp(54px, 12vw, 70px);
+      height: clamp(54px, 12vw, 70px);
       border-radius: 50%;
       background: radial-gradient(circle, rgba(16,185,129,0.20) 0%, transparent 70%);
       display: flex;
@@ -343,7 +350,7 @@
       animation: fadeUp 0.7s ease 0.5s both, pulse 2.5s ease-in-out 1.3s infinite;
     }
     .checkmark-icon {
-      font-size: clamp(2.4rem, 8vw, 3.4rem);
+      font-size: clamp(2rem, 6.5vw, 2.8rem);
       line-height: 1;
       color: var(--emerald);
       filter: drop-shadow(0 2px 16px rgba(16,185,129,0.7));
@@ -358,31 +365,31 @@
        ========================================================================= */
     .success-title {
       font-family: var(--font-royal);
-      font-size: clamp(1.5rem, 5vw, 2.2rem);
+      font-size: clamp(1.4rem, 4.5vw, 2rem);
       font-weight: 900;
       color: var(--gold-bright);
       letter-spacing: 0.04em;
       text-shadow: 0 0 30px rgba(212,175,55,0.6);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       animation: fadeUp 0.7s ease 0.6s both;
     }
 
     .success-subtitle {
       font-family: var(--font-royal);
-      font-size: clamp(0.72rem, 2.2vw, 0.95rem);
+      font-size: clamp(0.72rem, 2vw, 0.90rem);
       font-weight: 500;
       color: var(--gold);
       letter-spacing: 0.18em;
       text-transform: uppercase;
-      margin-bottom: clamp(12px, 3vw, 20px);
+      margin-bottom: clamp(10px, 2.5vw, 16px);
       animation: fadeUp 0.7s ease 0.65s both;
     }
 
     .success-message {
-      font-size: clamp(0.88rem, 2.5vw, 1.05rem);
+      font-size: clamp(0.85rem, 2.2vw, 1rem);
       color: var(--text-sub);
-      line-height: 1.8;
-      margin-bottom: clamp(14px, 3.5vw, 24px);
+      line-height: 1.75;
+      margin-bottom: clamp(12px, 3vw, 20px);
       animation: fadeUp 0.7s ease 0.75s both;
     }
 
@@ -392,7 +399,7 @@
     .divider {
       height: 1px;
       background: linear-gradient(90deg, transparent, var(--gold), transparent);
-      margin: clamp(12px, 3vw, 20px) 0;
+      margin: clamp(10px, 2.5vw, 16px) 0;
       opacity: 0.5;
       animation: fadeUp 0.7s ease 0.82s both;
     }
@@ -404,21 +411,21 @@
       background: rgba(212,175,55,0.06);
       border: 1px solid rgba(212,175,55,0.2);
       border-radius: 14px;
-      padding: clamp(14px, 3.5vw, 22px);
-      margin-bottom: clamp(18px, 4vw, 28px);
+      padding: clamp(12px, 3vw, 18px);
+      margin-bottom: clamp(16px, 3.5vw, 24px);
       animation: fadeUp 0.7s ease 0.9s both;
     }
     .contact-box h3 {
       font-family: var(--font-royal);
-      font-size: clamp(0.78rem, 2.2vw, 0.98rem);
+      font-size: clamp(0.76rem, 2vw, 0.92rem);
       color: var(--gold);
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       letter-spacing: 0.08em;
     }
     .contact-box p {
-      font-size: clamp(0.82rem, 2.2vw, 0.95rem);
+      font-size: clamp(0.80rem, 2vw, 0.92rem);
       color: var(--text-sub);
-      line-height: 1.75;
+      line-height: 1.7;
     }
     .contact-box a {
       color: var(--gold-bright);
@@ -436,11 +443,11 @@
       align-items: center;
       justify-content: center;
       gap: 10px;
-      padding: clamp(13px, 3vw, 17px) clamp(28px, 6vw, 44px);
+      padding: clamp(12px, 2.5vw, 15px) clamp(26px, 5vw, 40px);
       background: linear-gradient(135deg, var(--gold) 0%, #B8860B 100%);
       color: #000;
       font-family: var(--font-mod);
-      font-size: clamp(0.8rem, 2.2vw, 0.95rem);
+      font-size: clamp(0.8rem, 2vw, 0.92rem);
       font-weight: 800;
       letter-spacing: 0.1em;
       text-transform: uppercase;
@@ -648,14 +655,14 @@
       </div>
 
       <!-- Heading -->
-      <h1 class="success-title">Application Successful!</h1>
-      <p class="success-subtitle">Nataraj Nritya Mandir &mdash; Est. 1990</p>
+      <h1 class="success-title">ADMISSION APPLICATION RECEIVED!</h1>
+      <p class="success-subtitle">NATARAJ NRITYA MANDIR &mdash; EST. 1990</p>
 
       <!-- Message -->
       <p class="success-message">
-        Your examination application has been received successfully.<br>
-        <strong style="color:var(--gold);">Best wishes for your upcoming Examination!</strong><br>
-        Keep practising and let your art shine bright.
+        Thank you for choosing Nataraj Nritya Mandir. Your online admission application has been received and verified successfully.<br>
+        <strong style="color:var(--gold-bright); display: block; margin: 12px 0 8px; font-size: 1.02em; line-height: 1.5; background: rgba(212, 175, 55, 0.12); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(212, 175, 55, 0.35);">Next Step: Please visit our academy branch and pay the one-time Admission Fee of &#8377;800 to confirm your seat.</strong>
+        Under the guidance of Founder Sankari De, we look forward to welcoming you into our cultural family and helping your artistry shine bright.
       </p>
 
       <div class="divider"></div>
