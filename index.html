@@ -1600,55 +1600,55 @@
   </div>
 
   <!-- Admission Confirmation Voucher Modal (Includes Board Seals & Real Scan-able QR Code Engine) -->
-  <div class="modal-backdrop" id="confirmation-modal">
-    <div class="modal-box" style="text-align: center; max-width: 720px;">
-      <button class="modal-close-btn">&times;</button>
-      <div style="font-size: 3.8rem; color: var(--neon-gold); margin-bottom: 1rem;">
+  <div class="modal-backdrop" id="confirmation-modal" role="dialog" aria-modal="true" aria-labelledby="confirmation-modal-title">
+    <div class="modal-box confirmation-modal-box">
+      <button type="button" class="modal-close-btn" onclick="closeConfirmationModal()" aria-label="Close Confirmation Voucher">&times;</button>
+      <div class="confirmation-success-icon">
         <i class="fa-solid fa-circle-check"></i>
       </div>
-      <h2 class="text-royal gradient-gold">Admission Application Dispatched!</h2>
-      <p style="color: var(--text-sub); margin-bottom: 1.2rem;">Your application details have been dispatched to <strong>natrajhowrah62@gmail.com</strong>.</p>
+      <h2 id="confirmation-modal-title" class="text-royal gradient-gold confirmation-modal-title">Admission Application Dispatched!</h2>
+      <p class="confirmation-modal-subtitle">Your application details have been dispatched to <strong>natrajhowrah62@gmail.com</strong>.</p>
 
-      <div class="receipt-card voucher-print-area" style="position: relative; overflow: hidden;">
+      <div class="receipt-card voucher-print-area">
         <!-- Watermark -->
-        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.06; pointer-events: none; z-index: 0;">
-          <img src="assets/natraj_logo.webp" alt="Watermark" style="width: 300px; height: 300px; border-radius: 50%; filter: grayscale(100%);">
+        <div class="voucher-watermark">
+          <img src="assets/natraj_logo.webp" alt="Watermark" width="300" height="300">
         </div>
         
-        <div style="position: relative; z-index: 1;">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--neon-gold); padding-bottom: 1rem; margin-bottom: 1.5rem;">
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <img src="assets/natraj_logo.webp" alt="Logo" style="width: 50px; height: 50px; border-radius: 50%; border: 1.5px solid var(--neon-gold); object-fit: cover;">
-            <div>
-              <span style="font-weight: 900; color: var(--text-main); font-size: 1.3rem; display: block; text-align: left; font-family: var(--font-royal); text-transform: uppercase;">Nataraj Nritya Mandir</span>
-              <span style="font-weight: 800; color: var(--neon-gold-bright); font-size: 1.05rem; display: block; text-align: left;">OFFICIAL ENROLLMENT VOUCHER</span>
-              <span style="color: var(--text-sub); font-size: 0.82rem; font-family: var(--font-tech); text-align: left; display: block; margin-top: 2px;">CODE NO.: HOW/62 | BOARD REGN: S/81662</span>
+        <div class="voucher-content-relative">
+          <div class="voucher-header">
+            <div class="voucher-header-brand">
+              <img src="assets/natraj_logo.webp" alt="Logo" class="voucher-header-logo" width="56" height="56">
+              <div class="voucher-header-text">
+                <span class="voucher-title">Nataraj Nritya Mandir</span>
+                <span class="voucher-subtitle">OFFICIAL ENROLLMENT VOUCHER</span>
+                <span class="voucher-code-line">CODE NO.: HOW/62 | BOARD REGN: S/81662</span>
+              </div>
+            </div>
+            <span class="voucher-reg-badge" id="receipt-reg-id">HOW/62-ADM-123456</span>
+          </div>
+
+          <div class="voucher-body-grid">
+            <div class="voucher-details-col">
+              <div class="voucher-detail-row"><span class="voucher-label">Student Name:</span> <strong class="voucher-val-student" id="receipt-student-name">Ananya Roy</strong></div>
+              <div class="voucher-detail-row"><span class="voucher-label">Guardian Name:</span> <strong class="voucher-val-main" id="receipt-guardian">Subhash Roy</strong></div>
+              <div class="voucher-detail-row"><span class="voucher-label">Date of Birth:</span> <strong class="voucher-val-main" id="receipt-dob">15 May 2012</strong></div>
+              <div class="voucher-detail-row"><span class="voucher-label">Age &amp; Blood Group:</span> <strong class="voucher-val-highlight" id="receipt-age-blood">14 Yrs | Blood: O+</strong></div>
+              <div class="voucher-detail-row"><span class="voucher-label">Contact Phone:</span> <strong class="voucher-val-highlight" id="receipt-phone">+91 98300 00000</strong></div>
+              <div class="voucher-detail-row"><span class="voucher-label">Email Address:</span> <span class="voucher-val-main" id="receipt-email">ananya@example.com</span></div>
+              <div class="voucher-detail-row"><span class="voucher-label">School &amp; Class:</span> <span class="voucher-val-main" id="receipt-school-class">Sankrail High School (Class VIII)</span></div>
+              <div class="voucher-detail-row"><span class="voucher-label">Residential Address:</span> <span class="voucher-val-main" id="receipt-address">Sankrail Thana Road, Howrah</span></div>
+              <div class="voucher-detail-row"><span class="voucher-label">Selected Style:</span> <strong class="voucher-val-gold" id="receipt-style">Kathak Classical</strong></div>
+              <div class="voucher-detail-row"><span class="voucher-label">Batch Schedule:</span> <span class="voucher-val-main" id="receipt-batch">Saturday Batch</span></div>
+              <div class="voucher-detail-row"><span class="voucher-label">Board Affiliation:</span> <span class="voucher-val-gold">Purbi Sangeet-O-Kala Kendra (S/81662)</span></div>
+              <div class="voucher-detail-row"><span class="voucher-label">Date Issued:</span> <span class="voucher-val-main" id="receipt-date">24 Jul 2026</span></div>
+            </div>
+
+            <div class="voucher-qr-col">
+              <div id="receipt-qr-box" class="receipt-qr-box"></div>
+              <span class="voucher-qr-label"><i class="fa-solid fa-qrcode"></i> SCAN TO VERIFY</span>
             </div>
           </div>
-          <span style="color: var(--neon-pink); font-weight: 800; font-family: var(--font-tech); font-size: 1.1rem; background: rgba(233, 30, 99, 0.08); padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(233, 30, 99, 0.2);" id="receipt-reg-id">HOW/62-ADM-123456</span>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 140px; gap: 1.5rem; align-items: center;">
-          <div style="text-align: left; display: flex; flex-direction: column; gap: 7px; font-size: 0.92rem;">
-            <div><span style="color: var(--text-sub);">Student Name:</span> <strong style="color: var(--neon-gold-bright);" id="receipt-student-name">Ananya Roy</strong></div>
-            <div><span style="color: var(--text-sub);">Guardian Name:</span> <strong style="color: var(--text-main);" id="receipt-guardian">Subhash Roy</strong></div>
-            <div><span style="color: var(--text-sub);">Date of Birth:</span> <strong style="color: var(--text-main);" id="receipt-dob">15 May 2012</strong></div>
-            <div><span style="color: var(--text-sub);">Age & Blood Group:</span> <strong style="color: var(--neon-pink);" id="receipt-age-blood">14 Yrs | Blood: O+</strong></div>
-            <div><span style="color: var(--text-sub);">Contact Phone:</span> <strong style="color: var(--neon-pink);" id="receipt-phone">+91 98300 00000</strong></div>
-            <div><span style="color: var(--text-sub);">Email Address:</span> <span style="color: var(--text-main);" id="receipt-email">ananya@example.com</span></div>
-            <div><span style="color: var(--text-sub);">School & Class:</span> <span style="color: var(--text-main);" id="receipt-school-class">Sankrail High School (Class VIII)</span></div>
-            <div><span style="color: var(--text-sub);">Residential Address:</span> <span style="color: var(--text-main);" id="receipt-address">Sankrail Thana Road, Howrah</span></div>
-            <div><span style="color: var(--text-sub);">Selected Style:</span> <strong style="color: var(--neon-gold);" id="receipt-style">Kathak Classical</strong></div>
-            <div><span style="color: var(--text-sub);">Batch Schedule:</span> <span style="color: var(--text-main);" id="receipt-batch">Saturday Batch</span></div>
-            <div><span style="color: var(--text-sub);">Board Affiliation:</span> <span style="color: var(--neon-gold-bright);">Purbi Sangeet-O-Kala Kendra (S/81662)</span></div>
-            <div><span style="color: var(--text-sub);">Date Issued:</span> <span style="color: var(--text-main);" id="receipt-date">24 Jul 2026</span></div>
-          </div>
-
-          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-            <div id="receipt-qr-box" style="background: #ffffff; padding: 10px; border-radius: 12px; border: 2px solid var(--neon-gold); box-shadow: 0 0 20px var(--gold-glow); display: flex; justify-content: center; align-items: center;"></div>
-            <span style="font-size: 0.75rem; font-weight: 800; color: var(--neon-gold-bright); margin-top: 8px; letter-spacing: 1px;">SCAN VERIFY</span>
-          </div>
-        </div>
         </div>
       </div>
 
@@ -1661,11 +1661,11 @@
         </div>
       </div>
 
-      <div style="display: flex; gap: 1.2rem; justify-content: center;">
-        <button onclick="window.print()" class="btn-futuristic btn-secondary-glass">
+      <div class="voucher-actions">
+        <button type="button" onclick="window.print()" class="btn-futuristic btn-secondary-glass btn-voucher-print">
           <i class="fa-solid fa-print"></i> Print Official Voucher
         </button>
-        <button onclick="document.getElementById('confirmation-modal').classList.remove('active')" class="btn-futuristic btn-primary-glow">
+        <button type="button" onclick="closeConfirmationModal()" class="btn-futuristic btn-primary-glow btn-voucher-close">
           <i class="fa-solid fa-xmark"></i> Close Window
         </button>
       </div>
