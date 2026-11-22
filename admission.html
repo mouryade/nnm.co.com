@@ -728,6 +728,8 @@
       canvas.height = window.innerHeight;
     }
     window.addEventListener('resize', resize, { passive: true });
+    window.addEventListener('orientationchange', resize, { passive: true });
+    window.addEventListener('pageshow', resize);
     resize();
 
     function rand(a, b) { return Math.random() * (b - a) + a; }
@@ -921,7 +923,7 @@
     return audioCtx;
   }
 
-  // Single in-flight fetch & decode promise with memory caching
+  // Single in-flight fetch & decode promise with memory caching and browser disk cache
   function loadAudioBuffer() {
     if (audioBuffer) return Promise.resolve(audioBuffer);
     if (fetchDecodePromise) return fetchDecodePromise;
@@ -929,7 +931,7 @@
     var ctx = getOrCreateAudioContext();
     if (!ctx) return Promise.reject(new Error('AudioContext unsupported'));
 
-    fetchDecodePromise = fetch(AUDIO_SRC)
+    fetchDecodePromise = fetch(AUDIO_SRC, { cache: 'force-cache' })
       .then(function(response) {
         if (!response.ok) throw new Error('Audio fetch failed: ' + response.status);
         return response.arrayBuffer();
@@ -949,6 +951,12 @@
       });
 
     return fetchDecodePromise;
+  }
+
+  // Preload audio buffer immediately without blocking page rendering
+  function preloadAudioBuffer() {
+    if (getMusicPref() === 'off') return;
+    loadAudioBuffer().catch(function(){});
   }
 
   // HTML5 audio fallback in case Web Audio API is unsupported or blocked
@@ -982,6 +990,10 @@
       return fallbackToHtml5Audio();
     }
 
+    if (ctx.state === 'suspended') {
+      ctx.resume().catch(function(){});
+    }
+
     return loadAudioBuffer()
       .then(function(buffer) {
         if (getMusicPref() !== 'on') return;
@@ -1011,10 +1023,24 @@
         }
 
         clearMediaSession();
-        removeGestureListeners();
+
+        // Confirm audioCtx is running before removing gesture listeners
+        if (ctx.state === 'running') {
+          removeGestureListeners();
+        } else {
+          var onStateRunning = function() {
+            if (ctx.state === 'running') {
+              removeGestureListeners();
+              ctx.removeEventListener('statechange', onStateRunning);
+              updateUI();
+            }
+          };
+          ctx.addEventListener('statechange', onStateRunning);
+        }
         updateUI();
       })
-      .catch(function() {
+      .catch(function(err) {
+        console.warn('[NNM Audio] Web Audio failed, falling back to HTML5:', err);
         fallbackToHtml5Audio();
       });
   }
@@ -1039,8 +1065,8 @@
     updateUI();
   });
 
-  // Global Gesture Fallback for Mobile Autoplay Restrictions
-  var gestureEvents = ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'click', 'keydown', 'scroll'];
+  // Valid Chrome Android / iOS Safari gesture unlock activation events
+  var gestureEvents = ['touchend', 'pointerup', 'click', 'keydown', 'touchstart'];
 
   function removeGestureListeners() {
     if (!gestureActive) return;
@@ -1066,9 +1092,25 @@
       removeGestureListeners();
       return;
     }
-    // Synchronously create/resume AudioContext inside user gesture!
-    getOrCreateAudioContext();
-    startWebAudioPlayback();
+    // Synchronously create AND resume AudioContext inside user activation gesture!
+    var ctx = getOrCreateAudioContext();
+    if (ctx && ctx.state === 'suspended') {
+      ctx.resume().catch(function(){});
+    }
+
+    if (audioBuffer) {
+      startWebAudioPlayback();
+    } else {
+      // Decode still in flight: immediate visual feedback so user knows tap was captured
+      if (lbl) lbl.innerHTML = '&#127925; Starting...';
+      if (widget) {
+        widget.classList.add('music-waiting-tap');
+        widget.classList.remove('playing');
+      }
+      startWebAudioPlayback().catch(function() {
+        updateUI();
+      });
+    }
   }
 
   // Instant Background Auto-Pause & Seamless Return Auto-Resume
@@ -1106,57 +1148,62 @@
     handleVisibilityOrPageHide(false);
   });
 
-  // Floating widget toggle listener (Mute/Unmute without double start)
+  // Floating widget toggle listener (Clicking while in Tap for Music starts playback instead of muting)
   function toggleMusic(e) {
     if (e) {
       e.stopPropagation();
       if (e.preventDefault) e.preventDefault();
     }
     var pref = getMusicPref();
+    var isPlaying = (isWebAudioActive && audioCtx && audioCtx.state === 'running') ||
+                    (!isWebAudioActive && audio && !audio.paused);
 
-    if (pref === 'on') {
-      // User turning OFF (Mute)
-      setMusicPref('off');
-      removeGestureListeners();
-
-      if (isWebAudioActive && audioCtx && gainNode) {
-        var now = audioCtx.currentTime;
-        gainNode.gain.cancelScheduledValues(now);
-        gainNode.gain.setValueAtTime(gainNode.gain.value, now);
-        gainNode.gain.linearRampToValueAtTime(0.0001, now + 0.3);
-        setTimeout(function() {
-          if (getMusicPref() === 'off' && audioCtx && audioCtx.state === 'running') {
-            audioCtx.suspend().catch(function(){});
-          }
-        }, 350);
-      }
-
-      if (audio && !audio.paused) {
-        audio.pause();
-        audio.muted = true;
-      }
-
-      clearMediaSession();
-      updateUI();
-    } else {
-      // User turning ON (Unmute)
+    // If widget is currently NOT playing, click starts/unmutes music immediately!
+    if (!isPlaying) {
       setMusicPref('on');
-      getOrCreateAudioContext();
-
-      if (isWebAudioActive && audioCtx && sourceNode && gainNode) {
-        audioCtx.resume().then(function() {
-          var now = audioCtx.currentTime;
-          gainNode.gain.cancelScheduledValues(now);
-          gainNode.gain.setValueAtTime(Math.max(0.0001, gainNode.gain.value), now);
-          gainNode.gain.linearRampToValueAtTime(TARGET_VOL, now + 0.6);
-          clearMediaSession();
-          updateUI();
-        }).catch(function(){});
-      } else {
+      var ctx = getOrCreateAudioContext();
+      if (ctx && ctx.state === 'suspended') {
+        ctx.resume().catch(function(){});
+      }
+      if (audioBuffer) {
         startWebAudioPlayback();
+      } else {
+        if (lbl) lbl.innerHTML = '&#127925; Starting...';
+        if (widget) {
+          widget.classList.add('music-waiting-tap');
+          widget.classList.remove('playing');
+        }
+        startWebAudioPlayback().catch(function() {
+          updateUI();
+        });
       }
       updateUI();
+      return;
     }
+
+    // If currently playing, user is toggling OFF (Mute)
+    setMusicPref('off');
+    removeGestureListeners();
+
+    if (isWebAudioActive && audioCtx && gainNode) {
+      var now = audioCtx.currentTime;
+      gainNode.gain.cancelScheduledValues(now);
+      gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+      gainNode.gain.linearRampToValueAtTime(0.0001, now + 0.3);
+      setTimeout(function() {
+        if (getMusicPref() === 'off' && audioCtx && audioCtx.state === 'running') {
+          audioCtx.suspend().catch(function(){});
+        }
+      }, 350);
+    }
+
+    if (audio && !audio.paused) {
+      audio.pause();
+      audio.muted = true;
+    }
+
+    clearMediaSession();
+    updateUI();
   }
 
   widget.addEventListener('click', toggleMusic);
@@ -1167,17 +1214,20 @@
     }
   });
 
-  // Initial Playback Boot (Zero Wasted Bandwidth when Muted)
+  // Initial Playback Boot (Immediate Prefetch on DOMContentLoaded & Zero Wasted Bandwidth when Muted)
   var initialPref = getMusicPref();
   updateUI();
 
   if (initialPref === 'on') {
     attachGestureFallback();
+    // Prefetch audio buffer immediately on DOMContentLoaded (50ms)
+    setTimeout(preloadAudioBuffer, 50);
+    // Also trigger background autoplay on permissive browsers without heavy delay
     setTimeout(function() {
       if (getMusicPref() === 'on' && !sourceNode && !isWebAudioActive) {
-        startWebAudioPlayback();
+        startWebAudioPlayback().catch(function(){});
       }
-    }, 1200);
+    }, 150);
   }
 
   // Remove initial-paint transition lock after DOM boot
