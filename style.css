@@ -3554,6 +3554,123 @@ html.tier-ultra-lite .music-widget.music-waiting-tap {
   }
 }
 
+/* ==========================================================================
+   STRICT #CONTACT MOBILE OVERFLOW CONTAINMENT & REFINED WRAPPING (LOCK PRESERVED)
+   ========================================================================== */
+.page-view[data-page-view="contact"] {
+  max-width: 100vw;
+  box-sizing: border-box;
+  overflow-x: clip;
+}
+
+.page-view[data-page-view="contact"] .contact-section,
+.page-view[data-page-view="contact"] .container,
+.page-view[data-page-view="contact"] .contact-grid,
+.page-view[data-page-view="contact"] .map-box,
+.page-view[data-page-view="contact"] .map-box-header,
+.page-view[data-page-view="contact"] .google-map-wrapper,
+.page-view[data-page-view="contact"] .map-box-footer,
+.page-view[data-page-view="contact"] .contact-action-buttons {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  min-width: 0 !important;
+}
+
+.page-view[data-page-view="contact"] .contact-details,
+.page-view[data-page-view="contact"] .contact-details p,
+.page-view[data-page-view="contact"] .contact-details h5,
+.page-view[data-page-view="contact"] .contact-details a {
+  overflow-wrap: break-word;
+  word-break: normal;
+  max-width: 100%;
+}
+
+/* Natural & Graceful Email Wrapping (Refinement 3) */
+.page-view[data-page-view="contact"] .contact-highlight-link,
+.page-view[data-page-view="contact"] a[href^="mailto:"] strong,
+.page-view[data-page-view="contact"] a[href^="mailto:"] {
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
+}
+
+@media (max-width: 768px) {
+  .page-view[data-page-view="contact"] .map-box {
+    padding: 1.5rem 1.25rem !important;
+  }
+  .page-view[data-page-view="contact"] .map-box-header {
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+  }
+  .page-view[data-page-view="contact"] .map-box-header .logo-glow-wrapper,
+  .page-view[data-page-view="contact"] .map-box-header .logo-glow-wrapper img {
+    width: 78px !important;
+    height: 78px !important;
+    min-width: 78px !important;
+  }
+  .page-view[data-page-view="contact"] .map-box-header h4 {
+    font-size: 1.15rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-view[data-page-view="contact"] .contact-section {
+    padding: 2.2rem 0 !important;
+  }
+  .page-view[data-page-view="contact"] .map-box {
+    padding: 1.25rem 0.9rem !important;
+    border-radius: 14px !important;
+  }
+  .page-view[data-page-view="contact"] .map-box-header {
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    margin-bottom: 1rem !important;
+  }
+  .page-view[data-page-view="contact"] .map-box-header .logo-glow-wrapper,
+  .page-view[data-page-view="contact"] .map-box-header .logo-glow-wrapper img {
+    width: 64px !important;
+    height: 64px !important;
+    min-width: 64px !important;
+  }
+  .page-view[data-page-view="contact"] .map-box-header h4 {
+    font-size: 1.05rem !important;
+  }
+  .page-view[data-page-view="contact"] .google-map-wrapper {
+    margin-bottom: 1.1rem !important;
+  }
+  .page-view[data-page-view="contact"] .google-map-wrapper iframe {
+    height: 260px !important;
+  }
+  .page-view[data-page-view="contact"] .contact-action-buttons {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    width: 100% !important;
+    margin-bottom: 8px !important;
+  }
+  .page-view[data-page-view="contact"] .contact-action-buttons a.btn-futuristic {
+    width: 100% !important;
+    min-width: 0 !important;
+    flex: 1 1 100% !important;
+    height: 44px !important;
+    font-size: 0.82rem !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .page-view[data-page-view="contact"] .map-box {
+    padding: 1rem 0.65rem !important;
+  }
+  .page-view[data-page-view="contact"] .map-box-header .logo-glow-wrapper,
+  .page-view[data-page-view="contact"] .map-box-header .logo-glow-wrapper img {
+    width: 54px !important;
+    height: 54px !important;
+    min-width: 54px !important;
+  }
+  .page-view[data-page-view="contact"] .map-box-header h4 {
+    font-size: 0.95rem !important;
+  }
+}
+
 /* Interactive Smartphone Dial Pad UI Styles */
 .dialpad-modal-box {
   max-width: 440px !important;
