@@ -755,7 +755,7 @@ function initCursorFollower() {
 }
 
 /* ==========================================================================
-   5. AMBIENT CLASSICAL BACKGROUND AUDIO PLAYER (RABINDRA SANGEET AUTO-LOOP ENGINE)
+   5. AMBIENT CLASSICAL BACKGROUND AUDIO PLAYER (WEB AUDIO API ENGINE & FALLBACK)
    ========================================================================== */
 function initClassicalAudioPlayer() {
   const audio = document.getElementById('bg-classical-audio');
@@ -764,17 +764,33 @@ function initClassicalAudioPlayer() {
 
   if (!audio || !musicWidget) return;
 
-  // Ultra-soft ambient volume ceiling (< 4%)
-  const TARGET_VOLUME = 0.03;
-  audio.volume = TARGET_VOLUME;
-  audio.loop = true;
+  // Synced ambient volume target (15%)
+  const TARGET_VOLUME = 0.15;
+  const AUDIO_SRC = 'assets/Rabindra_Sangeet.mp3';
 
-  // Lock volume ceiling to prevent sudden loudness
-  audio.addEventListener('volumechange', () => {
-    if (audio.volume > TARGET_VOLUME) {
-      audio.volume = TARGET_VOLUME;
-    }
-  });
+  // Web Audio API State Variables
+  let audioCtx = null;
+  let gainNode = null;
+  let sourceNode = null;
+  let audioBuffer = null;
+  let fetchDecodePromise = null;
+  let isWebAudioActive = false;
+  let wasPlayingBeforeHide = false;
+  let gestureActive = false;
+
+  // Defensive mediaSession clearing to eliminate Android Chrome media notification shade
+  function clearMediaSession() {
+    try {
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = null;
+        navigator.mediaSession.playbackState = 'none';
+        const actions = ['play', 'pause', 'stop', 'seekbackward', 'seekforward', 'seekto', 'previoustrack', 'nexttrack'];
+        actions.forEach((act) => {
+          try { navigator.mediaSession.setActionHandler(act, null); } catch (_) {}
+        });
+      }
+    } catch (_) {}
+  }
 
   // Persistent User Preference Engine (nnm_music_pref) - Default is strictly 'on'
   function getMusicPref() {
@@ -783,7 +799,7 @@ function initClassicalAudioPlayer() {
       if (pref === 'off' || pref === 'on') return pref;
       const oldMuted = localStorage.getItem('nnm_audio_muted');
       if (oldMuted === 'true') return 'off';
-    } catch(err) {}
+    } catch (err) {}
     return 'on'; // Default is ON across ALL devices
   }
 
@@ -793,18 +809,21 @@ function initClassicalAudioPlayer() {
       localStorage.setItem('nnm_audio_muted', val === 'off' ? 'true' : 'false');
       localStorage.setItem('nnm_audio_playing', val === 'on' ? 'true' : 'false');
       document.documentElement.setAttribute('data-music-pref', val);
-    } catch(err) {}
+    } catch (err) {}
   }
 
   // Update Widget UI directly based on User Preference & Playback State
   function updateWidgetUI() {
     const pref = getMusicPref();
     document.documentElement.setAttribute('data-music-pref', pref);
+    const isPlaying = (isWebAudioActive && audioCtx && audioCtx.state === 'running') ||
+                      (!isWebAudioActive && audio && !audio.paused);
+
     if (pref === 'off') {
       musicWidget.classList.remove('playing', 'music-waiting-tap');
       musicWidget.setAttribute('aria-pressed', 'false');
       if (musicStatusText) musicStatusText.innerHTML = '&#128263; Music: OFF';
-    } else if (audio && !audio.paused) {
+    } else if (isPlaying) {
       musicWidget.classList.add('playing');
       musicWidget.classList.remove('music-waiting-tap');
       musicWidget.setAttribute('aria-pressed', 'true');
@@ -817,109 +836,145 @@ function initClassicalAudioPlayer() {
     }
   }
 
-  // Synchronize widget state with native audio events
-  audio.addEventListener('play', updateWidgetUI);
+  // Synchronous AudioContext creation (permanent unlock inside gesture)
+  function getOrCreateAudioContext() {
+    if (!audioCtx) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return null;
+      try {
+        audioCtx = new AudioContextClass();
+        gainNode = audioCtx.createGain();
+        gainNode.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+        gainNode.connect(audioCtx.destination);
+      } catch (e) {
+        return null;
+      }
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(() => {});
+    }
+    return audioCtx;
+  }
+
+  // Single in-flight fetch & decode promise with memory caching
+  function loadAudioBuffer() {
+    if (audioBuffer) return Promise.resolve(audioBuffer);
+    if (fetchDecodePromise) return fetchDecodePromise;
+
+    const ctx = getOrCreateAudioContext();
+    if (!ctx) return Promise.reject(new Error('AudioContext unsupported'));
+
+    fetchDecodePromise = fetch(AUDIO_SRC)
+      .then((response) => {
+        if (!response.ok) throw new Error('Audio fetch failed: ' + response.status);
+        return response.arrayBuffer();
+      })
+      .then((arrayBuffer) => {
+        return new Promise((resolve, reject) => {
+          ctx.decodeAudioData(arrayBuffer, resolve, reject);
+        });
+      })
+      .then((decodedBuffer) => {
+        audioBuffer = decodedBuffer;
+        return audioBuffer;
+      })
+      .catch((err) => {
+        fetchDecodePromise = null;
+        throw err;
+      });
+
+    return fetchDecodePromise;
+  }
+
+  // HTML5 audio fallback in case Web Audio API is unsupported or blocked
+  function fallbackToHtml5Audio() {
+    if (!audio || getMusicPref() !== 'on') return Promise.resolve();
+    audio.volume = TARGET_VOLUME;
+    audio.muted = false;
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      return playPromise
+        .then(() => {
+          removeGestureListeners();
+          clearMediaSession();
+          updateWidgetUI();
+        })
+        .catch(() => {
+          attachGestureFallback();
+          updateWidgetUI();
+        });
+    }
+    updateWidgetUI();
+    return Promise.resolve();
+  }
+
+  // Start or resume Web Audio playback with single-instance guard
+  function startWebAudioPlayback() {
+    if (getMusicPref() !== 'on') return Promise.resolve();
+
+    const ctx = getOrCreateAudioContext();
+    if (!ctx) {
+      return fallbackToHtml5Audio();
+    }
+
+    return loadAudioBuffer()
+      .then((buffer) => {
+        if (getMusicPref() !== 'on') return;
+
+        if (ctx.state === 'suspended') {
+          ctx.resume().catch(() => {});
+        }
+
+        // Strict single-instance guard: check if sourceNode already exists
+        if (!sourceNode) {
+          sourceNode = ctx.createBufferSource();
+          sourceNode.buffer = buffer;
+          sourceNode.loop = true;
+          sourceNode.connect(gainNode);
+          sourceNode.start(0);
+        }
+
+        // Smooth volume ramp: 0.001 -> 0.15 in 0.6s
+        const now = ctx.currentTime;
+        gainNode.gain.cancelScheduledValues(now);
+        gainNode.gain.setValueAtTime(Math.max(0.0001, gainNode.gain.value), now);
+        gainNode.gain.linearRampToValueAtTime(TARGET_VOLUME, now + 0.6);
+
+        isWebAudioActive = true;
+        if (audio && !audio.paused) {
+          audio.pause();
+        }
+
+        clearMediaSession();
+        removeGestureListeners();
+        updateWidgetUI();
+      })
+      .catch((err) => {
+        fallbackToHtml5Audio();
+      });
+  }
+
+  // Fallback Audio Element Setup
+  audio.volume = TARGET_VOLUME;
+  audio.loop = true;
+  audio.addEventListener('volumechange', () => {
+    if (audio.volume > TARGET_VOLUME) audio.volume = TARGET_VOLUME;
+  });
+  audio.addEventListener('play', () => {
+    clearMediaSession();
+    updateWidgetUI();
+  });
   audio.addEventListener('playing', () => {
+    clearMediaSession();
     removeGestureListeners();
     updateWidgetUI();
   });
-  audio.addEventListener('pause', updateWidgetUI);
-
-  // One-time safe position restoration (prevents loop seek-traps)
-  let hasRestoredInitialTime = false;
-  function restorePlaybackTime() {
-    if (hasRestoredInitialTime) return;
-    let savedTime = 0;
-    try {
-      savedTime = parseFloat(localStorage.getItem('nnm_audio_time') || '0');
-    } catch(err) {}
-
-    if (!isNaN(savedTime) && savedTime > 0) {
-      try {
-        if (!audio.duration || (savedTime < audio.duration - 2)) {
-          audio.currentTime = savedTime;
-          hasRestoredInitialTime = true;
-        } else {
-          audio.currentTime = 0;
-          try { localStorage.setItem('nnm_audio_time', '0'); } catch(err) {}
-          hasRestoredInitialTime = true;
-        }
-      } catch (e) {
-        return;
-      }
-    } else {
-      hasRestoredInitialTime = true;
-    }
-  }
-
-  restorePlaybackTime();
-  const onInitialReady = () => {
-    if (!hasRestoredInitialTime) restorePlaybackTime();
-  };
-  audio.addEventListener('loadedmetadata', onInitialReady, { once: true });
-  audio.addEventListener('canplay', onInitialReady, { once: true });
-
-  // Function to save current playback time and handle loop detection
-  let lastRecordedTime = 0;
-  function savePlaybackTime() {
-    if (!audio || isNaN(audio.currentTime)) return;
-    const cur = audio.currentTime;
-
-    // Detect loop wrap-around: if currentTime wrapped from near end (> 5s) back to beginning (< 2s)
-    if (lastRecordedTime > 5 && cur < 2) {
-      try { localStorage.setItem('nnm_audio_time', '0'); } catch(err) {}
-      lastRecordedTime = cur;
-      return;
-    }
-
-    // If within 1.5 seconds of the end, save as 0 so the next cycle/session starts clean
-    if (audio.duration && cur >= audio.duration - 1.5) {
-      try { localStorage.setItem('nnm_audio_time', '0'); } catch(err) {}
-    } else if (cur >= 0) {
-      try { localStorage.setItem('nnm_audio_time', cur.toString()); } catch(err) {}
-    }
-    lastRecordedTime = cur;
-  }
-
-  // Continuously track timestamp with high precision
-  audio.addEventListener('timeupdate', savePlaybackTime);
-  setInterval(() => {
-    if (!audio.paused) {
-      savePlaybackTime();
-    }
-  }, 250);
-
-  // Save state immediately on navigation or page hide/unload
-  window.addEventListener('beforeunload', savePlaybackTime);
-  window.addEventListener('pagehide', savePlaybackTime);
-
-  // Seamless Looping Engine
-  audio.addEventListener('ended', () => {
-    try { localStorage.setItem('nnm_audio_time', '0'); } catch(err) {}
-    lastRecordedTime = 0;
-    audio.currentTime = 0;
-    if (getMusicPref() === 'on') {
-      audio.volume = TARGET_VOLUME;
-      audio.muted = false;
-      const playPromise = audio.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {});
-      }
-    }
-  });
-
-  // Safeguard: If audio pauses near the end instead of looping smoothly
   audio.addEventListener('pause', () => {
-    if (getMusicPref() === 'on' && audio.duration && audio.currentTime >= audio.duration - 0.5) {
-      audio.currentTime = 0;
-      try { localStorage.setItem('nnm_audio_time', '0'); } catch(err) {}
-      audio.play().catch(() => {});
-    }
+    clearMediaSession();
+    updateWidgetUI();
   });
 
   // Global Gesture Fallback for Mobile Autoplay Restrictions
-  let gestureActive = false;
-  let isUnlocking = false;
   const gestureEvents = ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'click', 'keydown', 'scroll'];
 
   function removeGestureListeners() {
@@ -941,91 +996,101 @@ function initClassicalAudioPlayer() {
     });
   }
 
-  function onFirstGesture(e) {
+  function onFirstGesture() {
     if (getMusicPref() !== 'on') {
       removeGestureListeners();
       return;
     }
-    if (!audio || !audio.paused || isUnlocking) return;
-    isUnlocking = true;
+    // Synchronously create/resume AudioContext inside user gesture!
+    getOrCreateAudioContext();
+    startWebAudioPlayback();
+  }
 
-    if (!hasRestoredInitialTime) restorePlaybackTime();
-    audio.muted = false;
-    audio.volume = TARGET_VOLUME;
-    const p = audio.play();
-    if (p && typeof p.then === 'function') {
-      p.then(() => {
-        removeGestureListeners();
-        isUnlocking = false;
-        updateWidgetUI();
-      }).catch(() => {
-        isUnlocking = false;
-        updateWidgetUI();
-      });
+  // Instant Background Auto-Pause & Seamless Return Auto-Resume
+  function handleVisibilityOrPageHide(isHidden) {
+    if (isHidden) {
+      if (isWebAudioActive && audioCtx && audioCtx.state === 'running') {
+        wasPlayingBeforeHide = true;
+        audioCtx.suspend().catch(() => {});
+      } else if (audio && !audio.paused) {
+        wasPlayingBeforeHide = true;
+        audio.pause();
+      }
     } else {
-      isUnlocking = false;
-      updateWidgetUI();
+      if (wasPlayingBeforeHide && getMusicPref() === 'on') {
+        wasPlayingBeforeHide = false;
+        if (isWebAudioActive && audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume().then(() => {
+            clearMediaSession();
+            updateWidgetUI();
+          }).catch(() => {});
+        } else if (!isWebAudioActive && audio && audio.paused) {
+          audio.play().catch(() => {});
+        }
+      }
     }
   }
 
-  function playAudio() {
-    if (getMusicPref() !== 'on') {
-      audio.pause();
-      audio.muted = true;
-      updateWidgetUI();
-      return;
-    }
+  document.addEventListener('visibilitychange', () => {
+    handleVisibilityOrPageHide(document.hidden);
+  });
+  window.addEventListener('pagehide', () => {
+    handleVisibilityOrPageHide(true);
+  });
+  window.addEventListener('pageshow', () => {
+    handleVisibilityOrPageHide(false);
+  });
 
-    if (!hasRestoredInitialTime) {
-      restorePlaybackTime();
-    }
-    audio.volume = TARGET_VOLUME;
-    audio.muted = false;
-
-    const playPromise = audio.play();
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => {
-          removeGestureListeners();
-          updateWidgetUI();
-        })
-        .catch(() => {
-          // Autoplay blocked by mobile browser - show Tap for Music, attach gesture fallback
-          attachGestureFallback();
-          updateWidgetUI();
-        });
-    } else {
-      updateWidgetUI();
-    }
-  }
-
-  function pauseAudio() {
-    audio.pause();
-    audio.muted = true;
-    removeGestureListeners();
-    updateWidgetUI();
-    savePlaybackTime();
-  }
-
-  // Initial playback boot
-  updateWidgetUI();
-  if (getMusicPref() === 'on') {
-    playAudio();
-  }
-
-  // Floating widget toggle listener
+  // Floating widget toggle listener (Mute/Unmute without double start)
   function toggleMusic(e) {
     if (e) {
       e.stopPropagation();
       if (e.preventDefault) e.preventDefault();
     }
     const pref = getMusicPref();
-    if (pref === 'on' && audio && !audio.paused) {
+
+    if (pref === 'on') {
+      // User turning OFF (Mute)
       setMusicPref('off');
-      pauseAudio();
+      removeGestureListeners();
+
+      if (isWebAudioActive && audioCtx && gainNode) {
+        const now = audioCtx.currentTime;
+        gainNode.gain.cancelScheduledValues(now);
+        gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+        gainNode.gain.linearRampToValueAtTime(0.0001, now + 0.3);
+        setTimeout(() => {
+          if (getMusicPref() === 'off' && audioCtx && audioCtx.state === 'running') {
+            audioCtx.suspend().catch(() => {});
+          }
+        }, 350);
+      }
+
+      if (audio && !audio.paused) {
+        audio.pause();
+        audio.muted = true;
+      }
+
+      clearMediaSession();
+      updateWidgetUI();
     } else {
+      // User turning ON (Unmute)
       setMusicPref('on');
-      playAudio();
+      getOrCreateAudioContext();
+
+      if (isWebAudioActive && audioCtx && sourceNode && gainNode) {
+        audioCtx.resume().then(() => {
+          const now = audioCtx.currentTime;
+          gainNode.gain.cancelScheduledValues(now);
+          gainNode.gain.setValueAtTime(Math.max(0.0001, gainNode.gain.value), now);
+          gainNode.gain.linearRampToValueAtTime(TARGET_VOLUME, now + 0.6);
+          clearMediaSession();
+          updateWidgetUI();
+        }).catch(() => {});
+      } else {
+        startWebAudioPlayback();
+      }
+      updateWidgetUI();
     }
   }
 
@@ -1036,6 +1101,19 @@ function initClassicalAudioPlayer() {
       toggleMusic(e);
     }
   });
+
+  // Initial Playback Boot (Zero Wasted Bandwidth when Muted)
+  const initialPref = getMusicPref();
+  updateWidgetUI();
+
+  if (initialPref === 'on') {
+    attachGestureFallback();
+    setTimeout(() => {
+      if (getMusicPref() === 'on' && !sourceNode && !isWebAudioActive) {
+        startWebAudioPlayback();
+      }
+    }, 1200);
+  }
 }
 
 /* ==========================================================================
