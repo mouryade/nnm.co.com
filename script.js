@@ -61,6 +61,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 13. Real-Time Runtime FPS Watchdog (Auto-downgrades misreported budget hardware)
   initFPSWatchdog();
+
+  // 14. Live Viewport, matchMedia & BFCache Sync (Desktop Site <-> Mobile Switching)
+  initResponsiveViewportSync();
 });
 
 // State flag to track if About Us stats counter has animated in current visit
@@ -299,6 +302,8 @@ function initSPARouter() {
     }, 350);
   }
 
+  window.navigateTo = navigateTo;
+
   window.addEventListener('hashchange', () => {
     navigateTo(window.location.hash);
   });
@@ -516,14 +521,17 @@ function initLotusCanvas() {
 
   createParticles();
 
+  function resizeCanvas() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+    createParticles();
+  }
+  window.resizeLotusCanvas = resizeCanvas;
+
   let resizeDebounce = null;
   window.addEventListener('resize', () => {
     clearTimeout(resizeDebounce);
-    resizeDebounce = setTimeout(() => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-      createParticles();
-    }, 150);
+    resizeDebounce = setTimeout(resizeCanvas, 150);
   }, { passive: true });
 
   // Tab Visibility Lifecycle Management (Stops GPU/CPU Burn When Tab Inactive)
@@ -856,7 +864,7 @@ function initClassicalAudioPlayer() {
     return audioCtx;
   }
 
-  // Single in-flight fetch & decode promise with memory caching
+  // Single in-flight fetch & decode promise with memory caching and browser disk cache
   function loadAudioBuffer() {
     if (audioBuffer) return Promise.resolve(audioBuffer);
     if (fetchDecodePromise) return fetchDecodePromise;
@@ -864,7 +872,7 @@ function initClassicalAudioPlayer() {
     const ctx = getOrCreateAudioContext();
     if (!ctx) return Promise.reject(new Error('AudioContext unsupported'));
 
-    fetchDecodePromise = fetch(AUDIO_SRC)
+    fetchDecodePromise = fetch(AUDIO_SRC, { cache: 'force-cache' })
       .then((response) => {
         if (!response.ok) throw new Error('Audio fetch failed: ' + response.status);
         return response.arrayBuffer();
@@ -884,6 +892,12 @@ function initClassicalAudioPlayer() {
       });
 
     return fetchDecodePromise;
+  }
+
+  // Preload audio buffer immediately without blocking page rendering
+  function preloadAudioBuffer() {
+    if (getMusicPref() === 'off') return;
+    loadAudioBuffer().catch(() => {});
   }
 
   // HTML5 audio fallback in case Web Audio API is unsupported or blocked
@@ -917,6 +931,10 @@ function initClassicalAudioPlayer() {
       return fallbackToHtml5Audio();
     }
 
+    if (ctx.state === 'suspended') {
+      ctx.resume().catch(() => {});
+    }
+
     return loadAudioBuffer()
       .then((buffer) => {
         if (getMusicPref() !== 'on') return;
@@ -946,10 +964,24 @@ function initClassicalAudioPlayer() {
         }
 
         clearMediaSession();
-        removeGestureListeners();
+
+        // Confirm audioCtx is running before removing gesture listeners
+        if (ctx.state === 'running') {
+          removeGestureListeners();
+        } else {
+          const onStateRunning = () => {
+            if (ctx.state === 'running') {
+              removeGestureListeners();
+              ctx.removeEventListener('statechange', onStateRunning);
+              updateWidgetUI();
+            }
+          };
+          ctx.addEventListener('statechange', onStateRunning);
+        }
         updateWidgetUI();
       })
       .catch((err) => {
+        console.warn('[NNM Audio] Web Audio failed, falling back to HTML5:', err);
         fallbackToHtml5Audio();
       });
   }
@@ -974,8 +1006,8 @@ function initClassicalAudioPlayer() {
     updateWidgetUI();
   });
 
-  // Global Gesture Fallback for Mobile Autoplay Restrictions
-  const gestureEvents = ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'click', 'keydown', 'scroll'];
+  // Valid Chrome Android / iOS Safari gesture unlock activation events
+  const gestureEvents = ['touchend', 'pointerup', 'click', 'keydown', 'touchstart'];
 
   function removeGestureListeners() {
     if (!gestureActive) return;
@@ -1001,9 +1033,25 @@ function initClassicalAudioPlayer() {
       removeGestureListeners();
       return;
     }
-    // Synchronously create/resume AudioContext inside user gesture!
-    getOrCreateAudioContext();
-    startWebAudioPlayback();
+    // Synchronously create AND resume AudioContext inside user activation gesture!
+    const ctx = getOrCreateAudioContext();
+    if (ctx && ctx.state === 'suspended') {
+      ctx.resume().catch(() => {});
+    }
+
+    if (audioBuffer) {
+      startWebAudioPlayback();
+    } else {
+      // Decode still in flight: immediate visual feedback so user knows tap was captured
+      if (musicStatusText) musicStatusText.innerHTML = '&#127925; Starting...';
+      if (musicWidget) {
+        musicWidget.classList.add('music-waiting-tap');
+        musicWidget.classList.remove('playing');
+      }
+      startWebAudioPlayback().catch(() => {
+        updateWidgetUI();
+      });
+    }
   }
 
   // Instant Background Auto-Pause & Seamless Return Auto-Resume
@@ -1041,57 +1089,62 @@ function initClassicalAudioPlayer() {
     handleVisibilityOrPageHide(false);
   });
 
-  // Floating widget toggle listener (Mute/Unmute without double start)
+  // Floating widget toggle listener (Clicking while in Tap for Music starts playback instead of muting)
   function toggleMusic(e) {
     if (e) {
       e.stopPropagation();
       if (e.preventDefault) e.preventDefault();
     }
     const pref = getMusicPref();
+    const isPlaying = (isWebAudioActive && audioCtx && audioCtx.state === 'running') ||
+                      (!isWebAudioActive && audio && !audio.paused);
 
-    if (pref === 'on') {
-      // User turning OFF (Mute)
-      setMusicPref('off');
-      removeGestureListeners();
-
-      if (isWebAudioActive && audioCtx && gainNode) {
-        const now = audioCtx.currentTime;
-        gainNode.gain.cancelScheduledValues(now);
-        gainNode.gain.setValueAtTime(gainNode.gain.value, now);
-        gainNode.gain.linearRampToValueAtTime(0.0001, now + 0.3);
-        setTimeout(() => {
-          if (getMusicPref() === 'off' && audioCtx && audioCtx.state === 'running') {
-            audioCtx.suspend().catch(() => {});
-          }
-        }, 350);
-      }
-
-      if (audio && !audio.paused) {
-        audio.pause();
-        audio.muted = true;
-      }
-
-      clearMediaSession();
-      updateWidgetUI();
-    } else {
-      // User turning ON (Unmute)
+    // If widget is currently NOT playing, click starts/unmutes music immediately!
+    if (!isPlaying) {
       setMusicPref('on');
-      getOrCreateAudioContext();
-
-      if (isWebAudioActive && audioCtx && sourceNode && gainNode) {
-        audioCtx.resume().then(() => {
-          const now = audioCtx.currentTime;
-          gainNode.gain.cancelScheduledValues(now);
-          gainNode.gain.setValueAtTime(Math.max(0.0001, gainNode.gain.value), now);
-          gainNode.gain.linearRampToValueAtTime(TARGET_VOLUME, now + 0.6);
-          clearMediaSession();
-          updateWidgetUI();
-        }).catch(() => {});
-      } else {
+      const ctx = getOrCreateAudioContext();
+      if (ctx && ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
+      }
+      if (audioBuffer) {
         startWebAudioPlayback();
+      } else {
+        if (musicStatusText) musicStatusText.innerHTML = '&#127925; Starting...';
+        if (musicWidget) {
+          musicWidget.classList.add('music-waiting-tap');
+          musicWidget.classList.remove('playing');
+        }
+        startWebAudioPlayback().catch(() => {
+          updateWidgetUI();
+        });
       }
       updateWidgetUI();
+      return;
     }
+
+    // If currently playing, user is explicitly toggling OFF (Mute)
+    setMusicPref('off');
+    removeGestureListeners();
+
+    if (isWebAudioActive && audioCtx && gainNode) {
+      const now = audioCtx.currentTime;
+      gainNode.gain.cancelScheduledValues(now);
+      gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+      gainNode.gain.linearRampToValueAtTime(0.0001, now + 0.3);
+      setTimeout(() => {
+        if (getMusicPref() === 'off' && audioCtx && audioCtx.state === 'running') {
+          audioCtx.suspend().catch(() => {});
+        }
+      }, 350);
+    }
+
+    if (audio && !audio.paused) {
+      audio.pause();
+      audio.muted = true;
+    }
+
+    clearMediaSession();
+    updateWidgetUI();
   }
 
   musicWidget.addEventListener('click', toggleMusic);
@@ -1102,17 +1155,20 @@ function initClassicalAudioPlayer() {
     }
   });
 
-  // Initial Playback Boot (Zero Wasted Bandwidth when Muted)
+  // Initial Playback Boot (Immediate Prefetch on DOMContentLoaded & Zero Wasted Bandwidth when Muted)
   const initialPref = getMusicPref();
   updateWidgetUI();
 
   if (initialPref === 'on') {
     attachGestureFallback();
+    // Prefetch audio buffer immediately on DOMContentLoaded (50ms)
+    setTimeout(preloadAudioBuffer, 50);
+    // Also trigger background autoplay on permissive browsers without heavy delay
     setTimeout(() => {
       if (getMusicPref() === 'on' && !sourceNode && !isWebAudioActive) {
-        startWebAudioPlayback();
+        startWebAudioPlayback().catch(() => {});
       }
-    }, 1200);
+    }, 150);
   }
 }
 
@@ -3120,4 +3176,50 @@ function initScrollReveal() {
   // Initial trigger for current visible view
   window.refreshScrollReveal();
 }
+
+/* ==========================================================================
+   14. LIVE VIEWPORT, MATCHMEDIA & BFCACHE SYNC (DESKTOP SITE <-> MOBILE SWITCHING)
+   ========================================================================== */
+function initResponsiveViewportSync() {
+  const mql = window.matchMedia('(max-width: 900px)');
+
+  function handleBreakpointChange(e) {
+    const isMobile = e ? e.matches : mql.matches;
+    if (!isMobile) {
+      // Switching to Desktop mode: Close mobile drawer overlay and release body lock
+      const overlay = document.getElementById('mobile-drawer-overlay');
+      if (overlay && overlay.classList.contains('open')) {
+        overlay.classList.remove('open');
+        document.body.classList.remove('drawer-body-lock');
+      }
+    }
+    // Resize cosmic canvas immediately
+    if (typeof window.resizeLotusCanvas === 'function') {
+      window.resizeLotusCanvas();
+    }
+  }
+
+  if (mql.addEventListener) {
+    mql.addEventListener('change', handleBreakpointChange);
+  } else if (mql.addListener) {
+    mql.addListener(handleBreakpointChange);
+  }
+
+  let resizeDebounce = null;
+  function onViewportResize() {
+    clearTimeout(resizeDebounce);
+    resizeDebounce = setTimeout(handleBreakpointChange, 80);
+  }
+
+  window.addEventListener('resize', onViewportResize, { passive: true });
+  window.addEventListener('orientationchange', onViewportResize, { passive: true });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', onViewportResize, { passive: true });
+  }
+
+  window.addEventListener('pageshow', () => {
+    handleBreakpointChange();
+  });
+}
+
 
